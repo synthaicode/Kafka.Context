@@ -2,6 +2,12 @@
 
 A lightweight, opinionated Kafka + Schema Registry runtime with a context-centric, contract-first workflow (Avro).
 
+This API is intentionally small.
+
+- Produce / Consume only
+- Explicit failure handling via DLQ
+- Avro + Schema Registry are used to keep schemas reusable as contracts for downstream systems (e.g., Flink)
+
 ## Install
 
 ```sh
