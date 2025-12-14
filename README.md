@@ -1,38 +1,28 @@
 # Kafka.Context
 
-Kafka + Schema Registry を「Context中心・契約駆動」で扱うための、軽量で意見のある I/O ランタイム（契約形式: Avro）。
+Kafka + Schema Registry, with a small, opinionated, context-centric API (Avro contracts).
 
-NuGet: `Kafka.Context`
+NuGet: `Kafka.Context`  
+Target frameworks: .NET 8 / .NET 10  
+Source: https://github.com/synthaicode/Kafka.Context
 
-Target frameworks: .NET 8 / .NET 10
+## What it is
+- A minimal runtime for producing/consuming Kafka messages with Schema Registry-backed Avro schemas
+- A “KafkaContext” mental model (EF-like: `KafkaContext` ~= `DbContext`, `EventSet<T>` ~= `DbSet<T>`)
+- Explicit failure handling (Retry / DLQ)
 
-## What *This* Project Is *Not*
+## Non-goals
+- No stream processing engine (Kafka Streams / Flink)
+- No query generation or DSL (no JOIN / Window / Aggregation)
+- No general-purpose Kafka client wrapper (this stays intentionally small)
 
-This is **not**:
-- a Kafka Streams / ksqlDB engine
-- a query generator (no JOIN/Window/Aggregation)
-- a middleware framework (no bus/worker stack)
-- a KafkaFlow dependent library
-- an ORM for Kafka
+## Docs
+- Repository map: `overview.md`
+- Contracts (Avro / DLQ / provisioning): `docs/contracts/`
+- Target usage shape: `docs/samples/target_code_shape.md`
+- Release workflow: `docs/workflows/release_roles_and_steps.md`
+- NuGet README (the package page text): `src/Kafka.Context/README.md`
 
-This *is*:
-- a context-centric Kafka + Schema Registry IO layer
-- contract-first producer/consumer abstraction
-- lightweight, predictable, and opinionated
-
-## MVP scope
-- Provisioning: topic create/verify + Schema Registry register/verify (fail fast)
-- IO: `AddAsync(key, poco)` / `ForEachAsync(handler)` / DLQ + retry
-
-See `overview.md` for the repository map and scope.
-Target code shape sample: `docs/samples/target_code_shape.md`.
-Contracts: `docs/contracts/`.
-
-## Kafka.Context Kansei Model
-
- Context = (Cluster + Schema Registry)
-
- Context.Provision(...)   Topic & SR registration
- Context.AddAsync(key, valuePOCO)
- Context.ForEachAsync(handler)
- Context.Dlq.ForEachAsync(handler)
+## Tests
+- Unit: `dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release`
+- Physical (Windows + Docker): `tests/physical/Kafka.Context.PhysicalTests` (see `docs/workflows/release_roles_and_steps.md`)
