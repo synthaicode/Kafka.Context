@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <AssemblyName>Kafka.Context.Abstractions</AssemblyName>
+    <RootNamespace>Kafka.Context</RootNamespace>
+  </PropertyGroup>
+</Project>

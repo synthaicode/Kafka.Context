@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <AssemblyName>Kafka.Context</AssemblyName>
+    <RootNamespace>Kafka.Context</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kafka.Context.Abstractions\Kafka.Context.Abstractions.csproj" />
+    <ProjectReference Include="..\Kafka.Context.Application\Kafka.Context.Application.csproj" />
+    <ProjectReference Include="..\Kafka.Context.Messaging\Kafka.Context.Messaging.csproj" />
+    <ProjectReference Include="..\Kafka.Context.Infrastructure\Kafka.Context.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+  </ItemGroup>
+</Project>
