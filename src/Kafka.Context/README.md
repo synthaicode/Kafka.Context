@@ -8,6 +8,15 @@ This API is intentionally small.
 - Explicit failure handling via DLQ
 - Avro + Schema Registry are used to keep schemas reusable as contracts for downstream systems (e.g., Flink)
 
+Single-column key is treated as Kafka primitive and is not registered to SR. Only composite keys are treated as schema contracts.
+
+## Non-Goals
+
+- No stream processing engine (Kafka Streams/Flink-style processing is out of scope)
+- No ksqlDB query generation / DSL
+- No general-purpose Kafka client wrapper (this package stays opinionated and small)
+- No automatic schema evolution/migration tooling beyond (register/verify) during provisioning
+
 ## Install
 
 ```sh
@@ -107,5 +116,6 @@ You can override Confluent.Kafka settings per topic via:
 ```csharp
 var plans = ctx.PreviewSchemaRegistryAvro();
 foreach (var p in plans)
+    Console.WriteLine($"{p.KeySubject} / {p.ValueSubject}");
     Console.WriteLine($"{p.ValueSubject} => {p.ExpectedValueRecordFullName}");
 ```
