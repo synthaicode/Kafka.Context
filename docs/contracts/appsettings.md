@@ -3,6 +3,8 @@
 ## 達成できる結果
 利用者が `appsettings.json` だけで Kafka.Context を起動でき、環境差分は .NET 標準の設定スタックで上書きできる。
 
+English version: `docs/contracts/appsettings.en.md`
+
 ## Sources and precedence（override order）
 .NET 標準の設定スタックに従い、後勝ちで上書きする:
 - Code（builder / Fluent APIs）
