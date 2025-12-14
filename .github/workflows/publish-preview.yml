@@ -1,0 +1,71 @@
+name: Publish RC to GitHub Packages
+
+on:
+  push:
+    branches:
+      - "release/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build_test_pack_push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+          include-prerelease: true
+
+      - name: Compute RC version
+        id: ver
+        shell: bash
+        run: |
+          ref="${GITHUB_REF_NAME}"
+          base="${ref#release/}"
+          if [[ "$base" == "$ref" ]]; then
+            echo "Expected branch name like release/<version>, got: $ref" >&2
+            exit 1
+          fi
+          if ! [[ "$base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version must be SemVer X.Y.Z, got: $base" >&2
+            exit 1
+          fi
+          rc="rc${GITHUB_RUN_NUMBER}"
+          version="${base}-${rc}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version: $version"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Public API check (strict)
+        run: dotnet build Kafka.Context.sln -c Release -p:StrictPublicApi=true -warnaserror:RS0016,RS0017
+
+      - name: Unit tests
+        run: dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release
+
+      - name: Pack (RC)
+        run: |
+          dotnet pack src/Kafka.Context.Abstractions/Kafka.Context.Abstractions.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Messaging/Kafka.Context.Messaging.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Application/Kafka.Context.Application.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Infrastructure/Kafka.Context.Infrastructure.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+
+      - name: Push to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for pkg in ./artifacts/nuget/*.nupkg; do
+            dotnet nuget push "$pkg" \
+              --api-key "$GITHUB_TOKEN" \
+              --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+              --skip-duplicate
+          done

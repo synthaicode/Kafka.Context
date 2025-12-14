@@ -1,0 +1,58 @@
+#nullable enable
+Kafka.Context.Messaging.DlqEnvelope
+Kafka.Context.Messaging.DlqEnvelope.ApplicationId.get -> string?
+Kafka.Context.Messaging.DlqEnvelope.ApplicationId.set -> void
+Kafka.Context.Messaging.DlqEnvelope.ConsumerGroup.get -> string?
+Kafka.Context.Messaging.DlqEnvelope.ConsumerGroup.set -> void
+Kafka.Context.Messaging.DlqEnvelope.DlqEnvelope() -> void
+Kafka.Context.Messaging.DlqEnvelope.ErrorFingerprint.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.ErrorFingerprint.set -> void
+Kafka.Context.Messaging.DlqEnvelope.ErrorMessageShort.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.ErrorMessageShort.set -> void
+Kafka.Context.Messaging.DlqEnvelope.ErrorType.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.ErrorType.set -> void
+Kafka.Context.Messaging.DlqEnvelope.Headers.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Kafka.Context.Messaging.DlqEnvelope.Headers.set -> void
+Kafka.Context.Messaging.DlqEnvelope.Host.get -> string?
+Kafka.Context.Messaging.DlqEnvelope.Host.set -> void
+Kafka.Context.Messaging.DlqEnvelope.IngestedAtUtc.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.IngestedAtUtc.set -> void
+Kafka.Context.Messaging.DlqEnvelope.KeyIsNull.get -> bool
+Kafka.Context.Messaging.DlqEnvelope.KeyIsNull.set -> void
+Kafka.Context.Messaging.DlqEnvelope.Offset.get -> long
+Kafka.Context.Messaging.DlqEnvelope.Offset.set -> void
+Kafka.Context.Messaging.DlqEnvelope.Partition.get -> int
+Kafka.Context.Messaging.DlqEnvelope.Partition.set -> void
+Kafka.Context.Messaging.DlqEnvelope.PayloadFormatKey.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.PayloadFormatKey.set -> void
+Kafka.Context.Messaging.DlqEnvelope.PayloadFormatValue.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.PayloadFormatValue.set -> void
+Kafka.Context.Messaging.DlqEnvelope.SchemaIdKey.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.SchemaIdKey.set -> void
+Kafka.Context.Messaging.DlqEnvelope.SchemaIdValue.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.SchemaIdValue.set -> void
+Kafka.Context.Messaging.DlqEnvelope.StackTraceShort.get -> string?
+Kafka.Context.Messaging.DlqEnvelope.StackTraceShort.set -> void
+Kafka.Context.Messaging.DlqEnvelope.TimestampUtc.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.TimestampUtc.set -> void
+Kafka.Context.Messaging.DlqEnvelope.Topic.get -> string!
+Kafka.Context.Messaging.DlqEnvelope.Topic.set -> void
+Kafka.Context.Messaging.MessageMeta
+Kafka.Context.Messaging.MessageMeta.<Clone>$() -> Kafka.Context.Messaging.MessageMeta!
+Kafka.Context.Messaging.MessageMeta.Deconstruct(out string! Topic, out int Partition, out long Offset, out string! TimestampUtc) -> void
+Kafka.Context.Messaging.MessageMeta.Equals(Kafka.Context.Messaging.MessageMeta? other) -> bool
+Kafka.Context.Messaging.MessageMeta.MessageMeta(string! Topic, int Partition, long Offset, string! TimestampUtc) -> void
+Kafka.Context.Messaging.MessageMeta.Offset.get -> long
+Kafka.Context.Messaging.MessageMeta.Offset.init -> void
+Kafka.Context.Messaging.MessageMeta.Partition.get -> int
+Kafka.Context.Messaging.MessageMeta.Partition.init -> void
+Kafka.Context.Messaging.MessageMeta.TimestampUtc.get -> string!
+Kafka.Context.Messaging.MessageMeta.TimestampUtc.init -> void
+Kafka.Context.Messaging.MessageMeta.Topic.get -> string!
+Kafka.Context.Messaging.MessageMeta.Topic.init -> void
+override Kafka.Context.Messaging.MessageMeta.Equals(object? obj) -> bool
+override Kafka.Context.Messaging.MessageMeta.GetHashCode() -> int
+override Kafka.Context.Messaging.MessageMeta.ToString() -> string!
+static Kafka.Context.Messaging.MessageMeta.operator !=(Kafka.Context.Messaging.MessageMeta? left, Kafka.Context.Messaging.MessageMeta? right) -> bool
+static Kafka.Context.Messaging.MessageMeta.operator ==(Kafka.Context.Messaging.MessageMeta? left, Kafka.Context.Messaging.MessageMeta? right) -> bool
+

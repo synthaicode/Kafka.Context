@@ -1,0 +1,118 @@
+#nullable enable
+const Kafka.Context.Configuration.KsqlDslConfigurationExtensions.DefaultSectionName = "KsqlDsl" -> string!
+Kafka.Context.Application.KafkaContextOptions
+Kafka.Context.Application.KafkaContextOptions.AutoRegisterSchemas.get -> bool
+Kafka.Context.Application.KafkaContextOptions.AutoRegisterSchemas.set -> void
+Kafka.Context.Application.KafkaContextOptions.Configuration.get -> Microsoft.Extensions.Configuration.IConfiguration?
+Kafka.Context.Application.KafkaContextOptions.Configuration.set -> void
+Kafka.Context.Application.KafkaContextOptions.EnableCachePreWarming.get -> bool
+Kafka.Context.Application.KafkaContextOptions.EnableCachePreWarming.set -> void
+Kafka.Context.Application.KafkaContextOptions.FailOnInitializationErrors.get -> bool
+Kafka.Context.Application.KafkaContextOptions.FailOnInitializationErrors.set -> void
+Kafka.Context.Application.KafkaContextOptions.FailOnSchemaErrors.get -> bool
+Kafka.Context.Application.KafkaContextOptions.FailOnSchemaErrors.set -> void
+Kafka.Context.Application.KafkaContextOptions.KafkaContextOptions() -> void
+Kafka.Context.Application.KafkaContextOptions.LoggerFactory.get -> Microsoft.Extensions.Logging.ILoggerFactory?
+Kafka.Context.Application.KafkaContextOptions.LoggerFactory.set -> void
+Kafka.Context.Application.KafkaContextOptions.SchemaRegistrationTimeout.get -> System.TimeSpan
+Kafka.Context.Application.KafkaContextOptions.SchemaRegistrationTimeout.set -> void
+Kafka.Context.Application.KafkaContextOptions.SchemaRegistryClient.get -> Confluent.SchemaRegistry.ISchemaRegistryClient!
+Kafka.Context.Application.KafkaContextOptions.SchemaRegistryClient.set -> void
+Kafka.Context.Application.KafkaContextOptions.Validate() -> void
+Kafka.Context.Configuration.CommonOptions
+Kafka.Context.Configuration.CommonOptions.AdditionalProperties.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Kafka.Context.Configuration.CommonOptions.AdditionalProperties.set -> void
+Kafka.Context.Configuration.CommonOptions.BootstrapServers.get -> string!
+Kafka.Context.Configuration.CommonOptions.BootstrapServers.set -> void
+Kafka.Context.Configuration.CommonOptions.ClientId.get -> string!
+Kafka.Context.Configuration.CommonOptions.ClientId.set -> void
+Kafka.Context.Configuration.CommonOptions.CommonOptions() -> void
+Kafka.Context.Configuration.CommonOptions.MetadataMaxAgeMs.get -> int
+Kafka.Context.Configuration.CommonOptions.MetadataMaxAgeMs.set -> void
+Kafka.Context.Configuration.KsqlDslConfigurationExtensions
+Kafka.Context.Configuration.KsqlDslOptions
+Kafka.Context.Configuration.KsqlDslOptions.AdjustReplicationFactorToBrokerCount.get -> bool
+Kafka.Context.Configuration.KsqlDslOptions.AdjustReplicationFactorToBrokerCount.set -> void
+Kafka.Context.Configuration.KsqlDslOptions.Common.get -> Kafka.Context.Configuration.CommonOptions!
+Kafka.Context.Configuration.KsqlDslOptions.Common.set -> void
+Kafka.Context.Configuration.KsqlDslOptions.DlqTopicName.get -> string!
+Kafka.Context.Configuration.KsqlDslOptions.DlqTopicName.set -> void
+Kafka.Context.Configuration.KsqlDslOptions.KsqlDslOptions() -> void
+Kafka.Context.Configuration.KsqlDslOptions.SchemaRegistry.get -> Kafka.Context.Configuration.SchemaRegistryOptions!
+Kafka.Context.Configuration.KsqlDslOptions.SchemaRegistry.set -> void
+Kafka.Context.Configuration.KsqlDslOptions.Topics.get -> System.Collections.Generic.Dictionary<string!, Kafka.Context.Configuration.TopicSection!>!
+Kafka.Context.Configuration.KsqlDslOptions.Topics.set -> void
+Kafka.Context.Configuration.SchemaRegistryMonitoringOptions
+Kafka.Context.Configuration.SchemaRegistryMonitoringOptions.SchemaRegistryMonitoringOptions() -> void
+Kafka.Context.Configuration.SchemaRegistryMonitoringOptions.SubjectWaitMaxAttempts.get -> int
+Kafka.Context.Configuration.SchemaRegistryMonitoringOptions.SubjectWaitMaxAttempts.set -> void
+Kafka.Context.Configuration.SchemaRegistryMonitoringOptions.SubjectWaitTimeout.get -> System.TimeSpan
+Kafka.Context.Configuration.SchemaRegistryMonitoringOptions.SubjectWaitTimeout.set -> void
+Kafka.Context.Configuration.SchemaRegistryOptions
+Kafka.Context.Configuration.SchemaRegistryOptions.Monitoring.get -> Kafka.Context.Configuration.SchemaRegistryMonitoringOptions!
+Kafka.Context.Configuration.SchemaRegistryOptions.Monitoring.set -> void
+Kafka.Context.Configuration.SchemaRegistryOptions.SchemaRegistryOptions() -> void
+Kafka.Context.Configuration.SchemaRegistryOptions.Url.get -> string!
+Kafka.Context.Configuration.SchemaRegistryOptions.Url.set -> void
+Kafka.Context.Configuration.TopicConsumerSection
+Kafka.Context.Configuration.TopicConsumerSection.AdditionalProperties.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Kafka.Context.Configuration.TopicConsumerSection.AdditionalProperties.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.AutoCommitIntervalMs.get -> int
+Kafka.Context.Configuration.TopicConsumerSection.AutoCommitIntervalMs.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.AutoOffsetReset.get -> string!
+Kafka.Context.Configuration.TopicConsumerSection.AutoOffsetReset.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.FetchMaxBytes.get -> int
+Kafka.Context.Configuration.TopicConsumerSection.FetchMaxBytes.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.FetchMinBytes.get -> int
+Kafka.Context.Configuration.TopicConsumerSection.FetchMinBytes.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.GroupId.get -> string!
+Kafka.Context.Configuration.TopicConsumerSection.GroupId.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.HeartbeatIntervalMs.get -> int
+Kafka.Context.Configuration.TopicConsumerSection.HeartbeatIntervalMs.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.IsolationLevel.get -> string!
+Kafka.Context.Configuration.TopicConsumerSection.IsolationLevel.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.MaxPollIntervalMs.get -> int
+Kafka.Context.Configuration.TopicConsumerSection.MaxPollIntervalMs.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.SessionTimeoutMs.get -> int
+Kafka.Context.Configuration.TopicConsumerSection.SessionTimeoutMs.set -> void
+Kafka.Context.Configuration.TopicConsumerSection.TopicConsumerSection() -> void
+Kafka.Context.Configuration.TopicCreationSection
+Kafka.Context.Configuration.TopicCreationSection.Configs.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Kafka.Context.Configuration.TopicCreationSection.Configs.set -> void
+Kafka.Context.Configuration.TopicCreationSection.NumPartitions.get -> int
+Kafka.Context.Configuration.TopicCreationSection.NumPartitions.set -> void
+Kafka.Context.Configuration.TopicCreationSection.ReplicationFactor.get -> short
+Kafka.Context.Configuration.TopicCreationSection.ReplicationFactor.set -> void
+Kafka.Context.Configuration.TopicCreationSection.TopicCreationSection() -> void
+Kafka.Context.Configuration.TopicProducerSection
+Kafka.Context.Configuration.TopicProducerSection.Acks.get -> string!
+Kafka.Context.Configuration.TopicProducerSection.Acks.set -> void
+Kafka.Context.Configuration.TopicProducerSection.AdditionalProperties.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Kafka.Context.Configuration.TopicProducerSection.AdditionalProperties.set -> void
+Kafka.Context.Configuration.TopicProducerSection.BatchNumMessages.get -> int
+Kafka.Context.Configuration.TopicProducerSection.BatchNumMessages.set -> void
+Kafka.Context.Configuration.TopicProducerSection.BatchSize.get -> int
+Kafka.Context.Configuration.TopicProducerSection.BatchSize.set -> void
+Kafka.Context.Configuration.TopicProducerSection.CompressionType.get -> string!
+Kafka.Context.Configuration.TopicProducerSection.CompressionType.set -> void
+Kafka.Context.Configuration.TopicProducerSection.DeliveryTimeoutMs.get -> int
+Kafka.Context.Configuration.TopicProducerSection.DeliveryTimeoutMs.set -> void
+Kafka.Context.Configuration.TopicProducerSection.EnableIdempotence.get -> bool?
+Kafka.Context.Configuration.TopicProducerSection.EnableIdempotence.set -> void
+Kafka.Context.Configuration.TopicProducerSection.LingerMs.get -> int
+Kafka.Context.Configuration.TopicProducerSection.LingerMs.set -> void
+Kafka.Context.Configuration.TopicProducerSection.MaxInFlightRequestsPerConnection.get -> int
+Kafka.Context.Configuration.TopicProducerSection.MaxInFlightRequestsPerConnection.set -> void
+Kafka.Context.Configuration.TopicProducerSection.RetryBackoffMs.get -> int
+Kafka.Context.Configuration.TopicProducerSection.RetryBackoffMs.set -> void
+Kafka.Context.Configuration.TopicProducerSection.TopicProducerSection() -> void
+Kafka.Context.Configuration.TopicSection
+Kafka.Context.Configuration.TopicSection.Consumer.get -> Kafka.Context.Configuration.TopicConsumerSection!
+Kafka.Context.Configuration.TopicSection.Consumer.set -> void
+Kafka.Context.Configuration.TopicSection.Creation.get -> Kafka.Context.Configuration.TopicCreationSection!
+Kafka.Context.Configuration.TopicSection.Creation.set -> void
+Kafka.Context.Configuration.TopicSection.Producer.get -> Kafka.Context.Configuration.TopicProducerSection!
+Kafka.Context.Configuration.TopicSection.Producer.set -> void
+Kafka.Context.Configuration.TopicSection.TopicSection() -> void
+static Kafka.Context.Configuration.KsqlDslConfigurationExtensions.GetKsqlDslOptions(this Microsoft.Extensions.Configuration.IConfiguration! configuration, string! sectionName = "KsqlDsl") -> Kafka.Context.Configuration.KsqlDslOptions!
+

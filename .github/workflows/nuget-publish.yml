@@ -1,0 +1,71 @@
+name: Publish stable to nuget.org
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  build_test_pack_push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+          include-prerelease: true
+
+      - name: Compute version
+        id: ver
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          if [[ "$version" == "$tag" ]]; then
+            echo "Expected tag like v<version>, got: $tag" >&2
+            exit 1
+          fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version must be SemVer X.Y.Z, got: $version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version: $version"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Public API check (strict)
+        run: dotnet build Kafka.Context.sln -c Release -p:StrictPublicApi=true -warnaserror:RS0016,RS0017
+
+      - name: Unit tests
+        run: dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release
+
+      - name: Pack (stable)
+        run: |
+          dotnet pack src/Kafka.Context.Abstractions/Kafka.Context.Abstractions.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Messaging/Kafka.Context.Messaging.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Application/Kafka.Context.Application.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Infrastructure/Kafka.Context.Infrastructure.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+
+      - name: Push to nuget.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "Missing secrets.NUGET_API_KEY" >&2
+            exit 1
+          fi
+          for pkg in ./artifacts/nuget/*.nupkg; do
+            dotnet nuget push "$pkg" \
+              --api-key "$NUGET_API_KEY" \
+              --source "https://api.nuget.org/v3/index.json"
+          done
