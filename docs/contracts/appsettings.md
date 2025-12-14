@@ -66,6 +66,69 @@ Topic の作成/検証や Producer/Consumer の細かな差分は、`KsqlDsl.Top
 
 補足: topic 情報はモデル側の `KsqlTopicAttribute` でも指定できる（`docs/contracts/topic_attributes.md`）。運用差分は appsettings を優先する。
 
+## Topic Consumer 設定 example
+別プロセス起動などで「前後関係」が不確実な場合は、consumer を `AutoOffsetReset = Earliest` に寄せる（未コミット時に先頭から読む）。
+
+```json
+{
+  "KsqlDsl": {
+    "Topics": {
+      "orders": {
+        "Consumer": {
+          "GroupId": "orders-consumer-v1",
+          "AutoOffsetReset": "Earliest",
+          "AutoCommitIntervalMs": 5000,
+          "SessionTimeoutMs": 30000,
+          "HeartbeatIntervalMs": 3000,
+          "MaxPollIntervalMs": 300000,
+          "FetchMinBytes": 1,
+          "FetchMaxBytes": 52428800,
+          "IsolationLevel": "ReadUncommitted",
+          "AdditionalProperties": {
+            "enable.partition.eof": "false"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Topic Producer 設定 example
+producer 側の信頼性/性能要件（idempotence など）は topic 単位で `KsqlDsl.Topics.<name>.Producer.*` に寄せる。
+
+```json
+{
+  "KsqlDsl": {
+    "Common": {
+      "BootstrapServers": "localhost:9092",
+      "ClientId": "my-producer-app"
+    },
+    "SchemaRegistry": {
+      "Url": "http://localhost:8085"
+    },
+    "Topics": {
+      "orders": {
+        "Producer": {
+          "Acks": "All",
+          "CompressionType": "Snappy",
+          "EnableIdempotence": true,
+          "MaxInFlightRequestsPerConnection": 1,
+          "LingerMs": 5,
+          "BatchSize": 16384,
+          "BatchNumMessages": 10000,
+          "DeliveryTimeoutMs": 120000,
+          "RetryBackoffMs": 100,
+          "AdditionalProperties": {
+            "message.max.bytes": "1000000"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ## Secured Kafka（SASL_SSL）example
 ```json
 {

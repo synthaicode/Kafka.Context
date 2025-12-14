@@ -32,12 +32,14 @@ internal static class KafkaConsumerService
         {
             BootstrapServers = options.Common.BootstrapServers,
             GroupId = $"{options.Common.ClientId}-{topic}",
-            EnableAutoCommit = autoCommit,
             AutoOffsetReset = AutoOffsetReset.Latest,
         };
 
         foreach (var kvp in options.Common.AdditionalProperties)
             consumerConfig.Set(kvp.Key, kvp.Value);
+
+        ApplyTopicConsumerConfig(options, topic, consumerConfig);
+        consumerConfig.EnableAutoCommit = autoCommit;
 
         using var schemaRegistry = new CachedSchemaRegistryClient(new SchemaRegistryConfig
         {
@@ -105,6 +107,122 @@ internal static class KafkaConsumerService
         }
 
         consumer.Close();
+    }
+
+    private static void ApplyTopicConsumerConfig(KsqlDslOptions options, string topic, ConsumerConfig consumerConfig)
+    {
+        var section = ResolveTopicSection(options, topic);
+        var consumer = section?.Consumer;
+        if (consumer is null)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(consumer.GroupId))
+            consumerConfig.GroupId = consumer.GroupId;
+
+        if (!string.IsNullOrWhiteSpace(consumer.AutoOffsetReset) &&
+            TryParseAutoOffsetReset(consumer.AutoOffsetReset, out var aor))
+        {
+            consumerConfig.AutoOffsetReset = aor;
+        }
+
+        if (consumer.AutoCommitIntervalMs > 0)
+            consumerConfig.AutoCommitIntervalMs = consumer.AutoCommitIntervalMs;
+        if (consumer.SessionTimeoutMs > 0)
+            consumerConfig.SessionTimeoutMs = consumer.SessionTimeoutMs;
+        if (consumer.HeartbeatIntervalMs > 0)
+            consumerConfig.HeartbeatIntervalMs = consumer.HeartbeatIntervalMs;
+        if (consumer.MaxPollIntervalMs > 0)
+            consumerConfig.MaxPollIntervalMs = consumer.MaxPollIntervalMs;
+        if (consumer.FetchMinBytes > 0)
+            consumerConfig.FetchMinBytes = consumer.FetchMinBytes;
+        if (consumer.FetchMaxBytes > 0)
+            consumerConfig.FetchMaxBytes = consumer.FetchMaxBytes;
+
+        if (!string.IsNullOrWhiteSpace(consumer.IsolationLevel) &&
+            TryParseIsolationLevel(consumer.IsolationLevel, out var iso))
+        {
+            consumerConfig.IsolationLevel = iso;
+        }
+
+        foreach (var kv in consumer.AdditionalProperties)
+            consumerConfig.Set(kv.Key, kv.Value);
+    }
+
+    private static TopicSection? ResolveTopicSection(KsqlDslOptions options, string topicName)
+    {
+        if (options.Topics.TryGetValue(topicName, out var section))
+            return section;
+
+        var baseKey = topicName;
+        if (topicName.EndsWith(".pub", StringComparison.OrdinalIgnoreCase) ||
+            topicName.EndsWith(".int", StringComparison.OrdinalIgnoreCase))
+        {
+            baseKey = topicName[..^4];
+            if (options.Topics.TryGetValue(baseKey, out section))
+                return section;
+        }
+
+        var lookup = baseKey;
+        if (lookup.Contains("_hb_", StringComparison.OrdinalIgnoreCase))
+            lookup = lookup.Replace("_hb_", "_", StringComparison.OrdinalIgnoreCase);
+
+        return FindByPrefix(lookup, options);
+    }
+
+    private static TopicSection? FindByPrefix(string name, KsqlDslOptions options)
+    {
+        if (options.Topics.TryGetValue(name, out var section))
+            return section;
+
+        var idx = name.LastIndexOf('_');
+        while (idx > 0)
+        {
+            var prefix = name[..idx];
+            if (options.Topics.TryGetValue(prefix, out section))
+                return section;
+            idx = prefix.LastIndexOf('_');
+        }
+
+        return null;
+    }
+
+    private static bool TryParseAutoOffsetReset(string value, out AutoOffsetReset aor)
+    {
+        if (string.Equals(value, "Earliest", StringComparison.OrdinalIgnoreCase))
+        {
+            aor = AutoOffsetReset.Earliest;
+            return true;
+        }
+        if (string.Equals(value, "Latest", StringComparison.OrdinalIgnoreCase))
+        {
+            aor = AutoOffsetReset.Latest;
+            return true;
+        }
+        if (string.Equals(value, "Error", StringComparison.OrdinalIgnoreCase))
+        {
+            aor = AutoOffsetReset.Error;
+            return true;
+        }
+
+        aor = AutoOffsetReset.Latest;
+        return false;
+    }
+
+    private static bool TryParseIsolationLevel(string value, out IsolationLevel iso)
+    {
+        if (string.Equals(value, "ReadCommitted", StringComparison.OrdinalIgnoreCase))
+        {
+            iso = IsolationLevel.ReadCommitted;
+            return true;
+        }
+        if (string.Equals(value, "ReadUncommitted", StringComparison.OrdinalIgnoreCase))
+        {
+            iso = IsolationLevel.ReadUncommitted;
+            return true;
+        }
+
+        iso = IsolationLevel.ReadUncommitted;
+        return false;
     }
 
     private static Dictionary<string, string> ExtractHeaders(Headers? headers)

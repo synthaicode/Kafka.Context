@@ -39,6 +39,8 @@ public sealed class SchemaRegistryMonitoringOptions
 public sealed class TopicSection
 {
     public TopicCreationSection Creation { get; set; } = new();
+    public TopicConsumerSection Consumer { get; set; } = new();
+    public TopicProducerSection Producer { get; set; } = new();
 }
 
 public sealed class TopicCreationSection
@@ -48,3 +50,32 @@ public sealed class TopicCreationSection
     public Dictionary<string, string> Configs { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
+public sealed class TopicConsumerSection
+{
+    public string GroupId { get; set; } = string.Empty;
+    public string AutoOffsetReset { get; set; } = string.Empty;
+    public int AutoCommitIntervalMs { get; set; } = 0;
+    public int SessionTimeoutMs { get; set; } = 0;
+    public int HeartbeatIntervalMs { get; set; } = 0;
+    public int MaxPollIntervalMs { get; set; } = 0;
+    public int FetchMinBytes { get; set; } = 0;
+    public int FetchMaxBytes { get; set; } = 0;
+    public string IsolationLevel { get; set; } = string.Empty;
+
+    public Dictionary<string, string> AdditionalProperties { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+}
+
+public sealed class TopicProducerSection
+{
+    public string Acks { get; set; } = string.Empty;
+    public string CompressionType { get; set; } = string.Empty;
+    public bool? EnableIdempotence { get; set; } = null;
+    public int MaxInFlightRequestsPerConnection { get; set; } = 0;
+    public int LingerMs { get; set; } = 0;
+    public int BatchSize { get; set; } = 0;
+    public int BatchNumMessages { get; set; } = 0;
+    public int DeliveryTimeoutMs { get; set; } = 0;
+    public int RetryBackoffMs { get; set; } = 0;
+
+    public Dictionary<string, string> AdditionalProperties { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+}

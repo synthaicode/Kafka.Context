@@ -30,6 +30,8 @@ internal static class KafkaProducerService
         foreach (var kvp in options.Common.AdditionalProperties)
             producerConfig.Set(kvp.Key, kvp.Value);
 
+        ApplyTopicProducerConfig(options, topic, producerConfig);
+
         using var schemaRegistry = new CachedSchemaRegistryClient(new SchemaRegistryConfig
         {
             Url = options.SchemaRegistry.Url
@@ -46,6 +48,138 @@ internal static class KafkaProducerService
 
         var message = new Message<Null, GenericRecord> { Value = record };
         _ = await producer.ProduceAsync(topic, message).ConfigureAwait(false);
+    }
+
+    private static void ApplyTopicProducerConfig(KsqlDslOptions options, string topic, ProducerConfig producerConfig)
+    {
+        var section = ResolveTopicSection(options, topic);
+        var producer = section?.Producer;
+        if (producer is null)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(producer.Acks) && TryParseAcks(producer.Acks, out var acks))
+            producerConfig.Acks = acks;
+
+        if (!string.IsNullOrWhiteSpace(producer.CompressionType) && TryParseCompressionType(producer.CompressionType, out var comp))
+            producerConfig.CompressionType = comp;
+
+        if (producer.EnableIdempotence is not null)
+            producerConfig.EnableIdempotence = producer.EnableIdempotence.Value;
+
+        if (producer.MaxInFlightRequestsPerConnection > 0)
+            producerConfig.MaxInFlight = producer.MaxInFlightRequestsPerConnection;
+
+        if (producer.LingerMs > 0)
+            producerConfig.LingerMs = producer.LingerMs;
+
+        if (producer.BatchSize > 0)
+            producerConfig.BatchSize = producer.BatchSize;
+
+        if (producer.BatchNumMessages > 0)
+            producerConfig.BatchNumMessages = producer.BatchNumMessages;
+
+        if (producer.DeliveryTimeoutMs > 0)
+            producerConfig.MessageTimeoutMs = producer.DeliveryTimeoutMs;
+
+        if (producer.RetryBackoffMs > 0)
+            producerConfig.RetryBackoffMs = producer.RetryBackoffMs;
+
+        foreach (var kv in producer.AdditionalProperties)
+            producerConfig.Set(kv.Key, kv.Value);
+    }
+
+    private static TopicSection? ResolveTopicSection(KsqlDslOptions options, string topicName)
+    {
+        if (options.Topics.TryGetValue(topicName, out var section))
+            return section;
+
+        var baseKey = topicName;
+        if (topicName.EndsWith(".pub", StringComparison.OrdinalIgnoreCase) ||
+            topicName.EndsWith(".int", StringComparison.OrdinalIgnoreCase))
+        {
+            baseKey = topicName[..^4];
+            if (options.Topics.TryGetValue(baseKey, out section))
+                return section;
+        }
+
+        var lookup = baseKey;
+        if (lookup.Contains("_hb_", StringComparison.OrdinalIgnoreCase))
+            lookup = lookup.Replace("_hb_", "_", StringComparison.OrdinalIgnoreCase);
+
+        return FindByPrefix(lookup, options);
+    }
+
+    private static TopicSection? FindByPrefix(string name, KsqlDslOptions options)
+    {
+        if (options.Topics.TryGetValue(name, out var section))
+            return section;
+
+        var idx = name.LastIndexOf('_');
+        while (idx > 0)
+        {
+            var prefix = name[..idx];
+            if (options.Topics.TryGetValue(prefix, out section))
+                return section;
+            idx = prefix.LastIndexOf('_');
+        }
+
+        return null;
+    }
+
+    private static bool TryParseAcks(string value, out Acks acks)
+    {
+        if (string.Equals(value, "All", StringComparison.OrdinalIgnoreCase))
+        {
+            acks = Acks.All;
+            return true;
+        }
+        if (string.Equals(value, "Leader", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(value, "1", StringComparison.OrdinalIgnoreCase))
+        {
+            acks = Acks.Leader;
+            return true;
+        }
+        if (string.Equals(value, "None", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(value, "0", StringComparison.OrdinalIgnoreCase))
+        {
+            acks = Acks.None;
+            return true;
+        }
+
+        acks = Acks.All;
+        return false;
+    }
+
+    private static bool TryParseCompressionType(string value, out CompressionType compression)
+    {
+        if (string.Equals(value, "None", StringComparison.OrdinalIgnoreCase))
+        {
+            compression = CompressionType.None;
+            return true;
+        }
+        if (string.Equals(value, "Gzip", StringComparison.OrdinalIgnoreCase))
+        {
+            compression = CompressionType.Gzip;
+            return true;
+        }
+        if (string.Equals(value, "Snappy", StringComparison.OrdinalIgnoreCase))
+        {
+            compression = CompressionType.Snappy;
+            return true;
+        }
+        if (string.Equals(value, "Lz4", StringComparison.OrdinalIgnoreCase))
+        {
+            compression = CompressionType.Lz4;
+            return true;
+        }
+        if (string.Equals(value, "Zstd", StringComparison.OrdinalIgnoreCase))
+        {
+            compression = CompressionType.Zstd;
+            return true;
+        }
+
+        compression = CompressionType.None;
+        return false;
     }
 
     private static GenericRecord CreateRecord<T>(Avro.RecordSchema schema, T entity)

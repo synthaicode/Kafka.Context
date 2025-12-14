@@ -4,6 +4,7 @@ using Kafka.Context.Abstractions;
 using Kafka.Context.Messaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace Kafka.Context.PhysicalTests;
 
@@ -86,6 +87,56 @@ public sealed class SmokeTests
         });
     }
 
+    [Fact]
+    public async Task Add_Consume_AcrossProcesses_SchemaRegistry_Works()
+    {
+        if (!IsEnabled())
+            return;
+
+        await RunWithRetryAsync(async () =>
+        {
+            var repoRoot = FindRepoRoot();
+            var runnerProject = Path.Combine(repoRoot, "tests", "physical", "Kafka.Context.PhysicalRunner", "Kafka.Context.PhysicalRunner.csproj");
+            if (!File.Exists(runnerProject))
+                throw new FileNotFoundException($"Runner project not found: {runnerProject}");
+
+            var runnerDll = Path.Combine(repoRoot, "tests", "physical", "Kafka.Context.PhysicalRunner", "bin", "Release", "net8.0", "Kafka.Context.PhysicalRunner.dll");
+            var buildExit = await RunDotnetBuildAsync(repoRoot, runnerProject, timeout: TimeSpan.FromMinutes(5));
+            if (buildExit != 0 || !File.Exists(runnerDll))
+                throw new InvalidOperationException($"Runner build failed (exit={buildExit}). Expected dll: {runnerDll}");
+
+            var baseClientId = $"physical-proc-{Guid.NewGuid():N}";
+            var orderId = Random.Shared.Next(10_000, 99_999);
+
+            var commonEnv = new Dictionary<string, string>
+            {
+                ["KAFKA_CONTEXT_BOOTSTRAP_SERVERS"] = "127.0.0.1:39092",
+                ["KAFKA_CONTEXT_SCHEMA_REGISTRY_URL"] = "http://127.0.0.1:18081",
+                ["KAFKA_CONTEXT_ORDER_ID"] = orderId.ToString(),
+            };
+
+            using var consumer = StartRunnerProcess(repoRoot, runnerDll, "consume", $"{baseClientId}-consumer", commonEnv);
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(2), CancellationToken.None);
+
+                using var producer = StartRunnerProcess(repoRoot, runnerDll, "produce", $"{baseClientId}-producer", commonEnv);
+
+                var producerExit = await WaitForExitAsync(producer, TimeSpan.FromSeconds(60));
+                if (producerExit != 0)
+                    throw new InvalidOperationException($"Producer failed (exit={producerExit}).\nSTDOUT:\n{producer.StandardOutput.ReadToEnd()}\nSTDERR:\n{producer.StandardError.ReadToEnd()}");
+
+                var consumerExit = await WaitForExitAsync(consumer, TimeSpan.FromSeconds(60));
+                if (consumerExit != 0)
+                    throw new InvalidOperationException($"Consumer failed (exit={consumerExit}).\nSTDOUT:\n{consumer.StandardOutput.ReadToEnd()}\nSTDERR:\n{consumer.StandardError.ReadToEnd()}");
+            }
+            finally
+            {
+                try { if (!consumer.HasExited) consumer.Kill(entireProcessTree: true); } catch { }
+            }
+        });
+    }
+
     private static bool IsEnabled()
         => string.Equals(Environment.GetEnvironmentVariable("KAFKA_CONTEXT_PHYSICAL"), "1", StringComparison.Ordinal);
 
@@ -122,6 +173,82 @@ public sealed class SmokeTests
         }
 
         return false;
+    }
+
+    private static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "Kafka.Context.sln")) ||
+                Directory.Exists(Path.Combine(dir.FullName, ".git")))
+            {
+                return dir.FullName;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Repository root not found (Kafka.Context.sln/.git).");
+    }
+
+    private static async Task<int> RunDotnetBuildAsync(string repoRoot, string projectPath, TimeSpan timeout)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = $"build -c Release \"{projectPath}\"",
+            WorkingDirectory = repoRoot,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        using var p = Process.Start(psi) ?? throw new InvalidOperationException("Failed to start dotnet build");
+        var exit = await WaitForExitAsync(p, timeout);
+        if (exit != 0)
+            throw new InvalidOperationException($"dotnet build failed (exit={exit}).\nSTDOUT:\n{p.StandardOutput.ReadToEnd()}\nSTDERR:\n{p.StandardError.ReadToEnd()}");
+        return exit;
+    }
+
+    private static Process StartRunnerProcess(string repoRoot, string runnerDll, string mode, string clientId, IReadOnlyDictionary<string, string> env)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = $"\"{runnerDll}\" {mode}",
+            WorkingDirectory = repoRoot,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        psi.Environment["KAFKA_CONTEXT_CLIENT_ID"] = clientId;
+        foreach (var kv in env)
+            psi.Environment[kv.Key] = kv.Value;
+
+        var p = Process.Start(psi) ?? throw new InvalidOperationException("Failed to start runner process");
+        return p;
+    }
+
+    private static async Task<int> WaitForExitAsync(Process process, TimeSpan timeout)
+    {
+        using var cts = new CancellationTokenSource(timeout);
+        try
+        {
+            await process.WaitForExitAsync(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            try { process.Kill(entireProcessTree: true); } catch { }
+        }
+
+        if (!process.HasExited)
+            throw new TimeoutException("Process did not exit in time.");
+
+        return process.ExitCode;
     }
 
     [KsqlTopic("physical_orders_physical")]
