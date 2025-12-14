@@ -4,6 +4,9 @@
     <AssemblyName>Kafka.Context</AssemblyName>
     <RootNamespace>Kafka.Context</RootNamespace>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/synthaicode/Kafka.Context</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/synthaicode/Kafka.Context</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
