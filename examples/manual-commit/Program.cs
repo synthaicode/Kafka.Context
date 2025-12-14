@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ManualCommit;
 
-[KsqlTopic("manual-commit-orders")]
+[KafkaTopic("manual-commit-orders")]
 public class ManualCommitOrder
 {
     public int OrderId { get; set; }

@@ -48,7 +48,7 @@ using Kafka.Context.Attributes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-[KsqlTopic("orders")]
+[KafkaTopic("orders")]
 public sealed class Order
 {
     public int Id { get; set; }
@@ -84,12 +84,12 @@ await ctx.Orders.ForEachAsync(o =>
 });
 ```
 
-## EF-style mapping tip (KsqlTopic on entity)
+## EF-style mapping tip (KafkaTopic on entity)
 
-`KsqlTopicAttribute` is the equivalent of mapping an entity to a table name:
+`KafkaTopicAttribute` is the equivalent of mapping an entity to a table name:
 
 ```csharp
-[KsqlTopic("orders")]
+[KafkaTopic("orders")]
 public sealed class Order { /* ... */ }
 ```
 

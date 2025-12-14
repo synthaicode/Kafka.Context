@@ -3,5 +3,5 @@ using System;
 namespace Kafka.Context.Attributes;
 
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-[Obsolete("Use KafkaTimestampAttribute instead.")]
-public sealed class KsqlTimestampAttribute : Attribute;
+public class KafkaTimestampAttribute : Attribute;
+

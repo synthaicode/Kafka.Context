@@ -6,12 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace ErrorHandlingDlq;
 
-[KsqlTopic("orders")]
+[KafkaTopic("orders")]
 public class Order
 {
     public int Id { get; set; }
 
-    [KsqlDecimal(precision: 18, scale: 2)]
+    [KafkaDecimal(precision: 18, scale: 2)]
     public decimal Amount { get; set; }
 }
 

@@ -251,11 +251,11 @@ public sealed class SmokeTests
         return process.ExitCode;
     }
 
-    [KsqlTopic("physical_orders_physical")]
+    [KafkaTopic("physical_orders_physical")]
     private sealed class PhysicalOrder
     {
         public int Id { get; set; }
-        [KsqlDecimal(9, 2)]
+        [KafkaDecimal(9, 2)]
         public decimal Amount { get; set; }
     }
 

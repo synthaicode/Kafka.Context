@@ -102,11 +102,17 @@ public abstract class KafkaContext : IAsyncDisposable
         if (_topicByEntityType.TryGetValue(entityType, out var topic))
             return topic;
 
-        var attr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true);
-        if (attr is null)
-            throw new InvalidOperationException($"Missing [{nameof(KsqlTopicAttribute)}] on entity type '{entityType.FullName}'.");
+        var kafkaAttr = entityType.GetCustomAttribute<KafkaTopicAttribute>(inherit: true);
+        if (kafkaAttr is not null)
+            return kafkaAttr.Name;
 
-        return attr.Name;
+#pragma warning disable CS0618
+        var ksqlAttr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true);
+#pragma warning restore CS0618
+        if (ksqlAttr is not null)
+            return ksqlAttr.Name;
+
+        throw new InvalidOperationException($"Missing [{nameof(KafkaTopicAttribute)}] on entity type '{entityType.FullName}'.");
     }
 
     private void InitializeEventSets()
@@ -150,11 +156,23 @@ public abstract class KafkaContext : IAsyncDisposable
         public void Entity<T>()
         {
             var entityType = typeof(T);
-            var attr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true);
-            if (attr is null)
-                throw new InvalidOperationException($"Missing [{nameof(KsqlTopicAttribute)}] on entity type '{entityType.FullName}'.");
+            var kafkaAttr = entityType.GetCustomAttribute<KafkaTopicAttribute>(inherit: true);
+            if (kafkaAttr is not null)
+            {
+                _topicByEntityType[entityType] = kafkaAttr.Name;
+                return;
+            }
 
-            _topicByEntityType[entityType] = attr.Name;
+#pragma warning disable CS0618
+            var ksqlAttr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true);
+#pragma warning restore CS0618
+            if (ksqlAttr is not null)
+            {
+                _topicByEntityType[entityType] = ksqlAttr.Name;
+                return;
+            }
+
+            throw new InvalidOperationException($"Missing [{nameof(KafkaTopicAttribute)}] on entity type '{entityType.FullName}'.");
         }
     }
 }

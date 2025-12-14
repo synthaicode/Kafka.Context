@@ -41,7 +41,7 @@ public sealed class SchemaRegistryAvroPlanTests
         }
     }
 
-    [KsqlTopic("ut_orders")]
+    [KafkaTopic("ut_orders")]
     private sealed class Order
     {
         public int Id { get; set; }

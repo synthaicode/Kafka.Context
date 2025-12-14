@@ -89,11 +89,11 @@ if (string.Equals(mode, "produce", StringComparison.OrdinalIgnoreCase))
     return 0;
 }
 
-[KsqlTopic("physical_orders_physical_proc_xp")]
+[KafkaTopic("physical_orders_physical_proc_xp")]
 public sealed class PhysicalOrder
 {
     public int Id { get; set; }
-    [KsqlDecimal(9, 2)]
+    [KafkaDecimal(9, 2)]
     public decimal Amount { get; set; }
 }
 

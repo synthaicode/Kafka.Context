@@ -32,7 +32,7 @@
   - `ForEachAsync(...)` overload 群（`docs/contracts/public_api.md`）
   - `Commit(T entity)`（manual commit）
 - attributes
-  - `KsqlTopicAttribute`（topic metadata）
+  - `KafkaTopicAttribute`（topic metadata）
   - key/timestamp/decimal 等（必要最小）
 
 ### M2: 設定（appsettings）

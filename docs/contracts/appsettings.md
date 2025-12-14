@@ -66,7 +66,7 @@ Topic の作成/検証や Producer/Consumer の細かな差分は、`KsqlDsl.Top
 }
 ```
 
-補足: topic 情報はモデル側の `KsqlTopicAttribute` でも指定できる（`docs/contracts/topic_attributes.md`）。運用差分は appsettings を優先する。
+補足: topic 情報はモデル側の `KafkaTopicAttribute` でも指定できる（`docs/contracts/topic_attributes.md`）。運用差分は appsettings を優先する。
 
 ## Topic Consumer 設定 example
 別プロセス起動などで「前後関係」が不確実な場合は、consumer を `AutoOffsetReset = Earliest` に寄せる（未コミット時に先頭から読む）。

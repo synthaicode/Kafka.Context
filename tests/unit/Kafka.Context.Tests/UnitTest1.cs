@@ -37,6 +37,6 @@ public class UnitTest1
         }
     }
 
-    [Kafka.Context.Attributes.KsqlTopic("dummy")]
+    [Kafka.Context.Attributes.KafkaTopic("dummy")]
     private sealed class DummyEntity;
 }

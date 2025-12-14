@@ -3,17 +3,17 @@ using System;
 namespace Kafka.Context.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public sealed class KsqlTopicAttribute : Attribute
+public class KafkaTopicAttribute : Attribute
 {
     public string Name { get; }
     public int PartitionCount { get; set; } = 1;
     public short ReplicationFactor { get; set; } = 1;
 
-    [Obsolete("Use KafkaTopicAttribute instead.")]
-    public KsqlTopicAttribute(string name)
+    public KafkaTopicAttribute(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Topic name cannot be null or empty", nameof(name));
         Name = name;
     }
 }
+

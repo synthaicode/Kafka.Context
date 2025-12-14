@@ -19,17 +19,16 @@ DLQ に「何が起きたか」「どのレコードか」「再処理に必要�
 
 ## 型（目標の形）
 ```csharp
-using Ksql.Linq.Core.Attributes;
 using System.Collections.Generic;
 
-namespace Ksql.Linq.Messaging;
+namespace Kafka.Context.Messaging;
 
 public class DlqEnvelope
 {
     public DlqEnvelope() { }
-    [KsqlKey] public string Topic { get; set; } = string.Empty;
-    [KsqlKey] public int Partition { get; set; }
-    [KsqlKey] public long Offset { get; set; }
+    [Kafka.Context.Attributes.KafkaKey] public string Topic { get; set; } = string.Empty;
+    [Kafka.Context.Attributes.KafkaKey] public int Partition { get; set; }
+    [Kafka.Context.Attributes.KafkaKey] public long Offset { get; set; }
 
     public string TimestampUtc { get; set; } = string.Empty;  // ISO8601 string
     public string IngestedAtUtc { get; set; } = string.Empty; // ISO8601 string

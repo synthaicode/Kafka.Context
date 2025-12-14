@@ -4,9 +4,9 @@ namespace Kafka.Context.Messaging;
 
 public sealed class DlqEnvelope
 {
-    [KsqlKey] public string Topic { get; set; } = string.Empty;
-    [KsqlKey] public int Partition { get; set; }
-    [KsqlKey] public long Offset { get; set; }
+    [KafkaKey] public string Topic { get; set; } = string.Empty;
+    [KafkaKey] public int Partition { get; set; }
+    [KafkaKey] public long Offset { get; set; }
 
     public string TimestampUtc { get; set; } = string.Empty;
     public string IngestedAtUtc { get; set; } = string.Empty;
@@ -28,4 +28,3 @@ public sealed class DlqEnvelope
 
     public Dictionary<string, string> Headers { get; set; } = new();
 }
-

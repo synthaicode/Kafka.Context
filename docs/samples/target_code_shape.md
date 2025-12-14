@@ -15,12 +15,12 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-[KsqlTopic("orders")]
+[KafkaTopic("orders")]
 public class Order
 {
     public int Id { get; set; }
 
-    [KsqlDecimal(precision: 18, scale: 2)]
+    [KafkaDecimal(precision: 18, scale: 2)]
     public decimal Amount { get; set; }
 }
 
@@ -85,7 +85,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-[KsqlTopic("manual-commit-orders")]
+[KafkaTopic("manual-commit-orders")]
 public class ManualCommitOrder
 {
     public int OrderId { get; set; }

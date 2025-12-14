@@ -44,28 +44,28 @@ public class AvroSchemaBuilderTests
         return asm.GetType("Kafka.Context.Infrastructure.SchemaRegistry.AvroSchemaBuilder", throwOnError: true)!;
     }
 
-    [KsqlTopic("no-key")]
+    [KafkaTopic("no-key")]
     private sealed class NoKeyEntity
     {
         public int Id { get; set; }
     }
 
-    [KsqlTopic("single-key")]
+    [KafkaTopic("single-key")]
     private sealed class SingleKeyEntity
     {
-        [KsqlKey] public int Id { get; set; }
+        [KafkaKey] public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    [KsqlTopic("composite-key")]
+    [KafkaTopic("composite-key")]
     private sealed class CompositeKeyEntity
     {
-        [KsqlKey] public int Id { get; set; }
-        [KsqlKey] public long Seq { get; set; }
+        [KafkaKey] public int Id { get; set; }
+        [KafkaKey] public long Seq { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    [KsqlTopic("decimal-no-attr")]
+    [KafkaTopic("decimal-no-attr")]
     private sealed class DecimalEntityWithoutAttr
     {
         public decimal Amount { get; set; }

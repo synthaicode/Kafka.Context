@@ -16,14 +16,29 @@ internal sealed record TopicExpectation(
         if (entityType is null) throw new ArgumentNullException(nameof(entityType));
         if (options is null) throw new ArgumentNullException(nameof(options));
 
-        var topicAttr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true)
-            ?? throw new InvalidOperationException($"Missing [{nameof(KsqlTopicAttribute)}] on entity type '{entityType.FullName}'.");
+        var kafkaAttr = entityType.GetCustomAttribute<KafkaTopicAttribute>(inherit: true);
+        if (kafkaAttr is not null)
+        {
+            var topicName = kafkaAttr.Name;
+            return Build(topicName, kafkaAttr.PartitionCount, kafkaAttr.ReplicationFactor, options);
+        }
 
-        var topicName = topicAttr.Name;
+#pragma warning disable CS0618
+        var ksqlAttr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true);
+#pragma warning restore CS0618
+        if (ksqlAttr is not null)
+        {
+            var topicName = ksqlAttr.Name;
+            return Build(topicName, ksqlAttr.PartitionCount, ksqlAttr.ReplicationFactor, options);
+        }
+
+        throw new InvalidOperationException($"Missing [{nameof(KafkaTopicAttribute)}] on entity type '{entityType.FullName}'.");
+    }
+
+    private static TopicExpectation Build(string topicName, int partitions, short rf, KsqlDslOptions options)
+    {
         var appCreation = ResolveCreation(topicName, options);
 
-        var partitions = topicAttr.PartitionCount;
-        var rf = topicAttr.ReplicationFactor;
         var configs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var enforceMatch = false;
 

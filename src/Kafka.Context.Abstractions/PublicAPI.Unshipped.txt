@@ -1,2 +1,16 @@
 #nullable enable
-
+Kafka.Context.Attributes.KafkaDecimalAttribute
+Kafka.Context.Attributes.KafkaDecimalAttribute.KafkaDecimalAttribute(int precision, int scale) -> void
+Kafka.Context.Attributes.KafkaDecimalAttribute.Precision.get -> int
+Kafka.Context.Attributes.KafkaDecimalAttribute.Scale.get -> int
+Kafka.Context.Attributes.KafkaKeyAttribute
+Kafka.Context.Attributes.KafkaKeyAttribute.KafkaKeyAttribute() -> void
+Kafka.Context.Attributes.KafkaTimestampAttribute
+Kafka.Context.Attributes.KafkaTimestampAttribute.KafkaTimestampAttribute() -> void
+Kafka.Context.Attributes.KafkaTopicAttribute
+Kafka.Context.Attributes.KafkaTopicAttribute.KafkaTopicAttribute(string! name) -> void
+Kafka.Context.Attributes.KafkaTopicAttribute.Name.get -> string!
+Kafka.Context.Attributes.KafkaTopicAttribute.PartitionCount.get -> int
+Kafka.Context.Attributes.KafkaTopicAttribute.PartitionCount.set -> void
+Kafka.Context.Attributes.KafkaTopicAttribute.ReplicationFactor.get -> short
+Kafka.Context.Attributes.KafkaTopicAttribute.ReplicationFactor.set -> void
