@@ -1,0 +1,62 @@
+name: Publish RC to GitHub Packages
+
+on:
+  push:
+    branches:
+      - "release/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build_test_pack_push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+          include-prerelease: true
+
+      - name: Compute RC version
+        id: ver
+        shell: bash
+        run: |
+          ref="${GITHUB_REF_NAME}"
+          base="${ref#release/}"
+          if [[ "$base" == "$ref" ]]; then
+            echo "Expected branch name like release/<version>, got: $ref" >&2
+            exit 1
+          fi
+          if ! [[ "$base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version must be SemVer X.Y.Z, got: $base" >&2
+            exit 1
+          fi
+          rc="rc${GITHUB_RUN_NUMBER}"
+          version="${base}-${rc}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version: $version"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Unit tests
+        run: dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release
+
+      - name: Pack (RC)
+        run: dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+
+      - name: Push to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget push ./artifacts/nuget/Kafka.Context.${{ steps.ver.outputs.version }}.nupkg \
+            --api-key "$GITHUB_TOKEN" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --skip-duplicate
+

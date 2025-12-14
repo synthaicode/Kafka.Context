@@ -103,6 +103,9 @@ GO 判定に必要な最低条件:
 ### 6.0 RC publish（必須: GitHub Packages）
 目的: nuget.org の stable publish 前に、RC を配布して「DL→動作確認」を行う。
 
+CI（推奨）:
+- `release/**` push → `.github/workflows/publish-preview.yml` が RC を GitHub Packages に publish
+
 #### 6.0.1 RC pack（ローカル）
 `<version>-rcN` を明示して pack する（例: `0.1.0-rc1`）。
 
@@ -151,6 +154,9 @@ dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\n
 
 ### 6.4 Stable publish（nuget.org）
 GO 後は commit hash をロックし、同一 commit hash から stable を publish する。
+
+CI（推奨）:
+- `v<version>` tag push → `.github/workflows/nuget-publish.yml` が pack/push を実行
 
 ```powershell
 # stable pack（例: 0.1.0）
