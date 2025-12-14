@@ -19,6 +19,7 @@ Source: https://github.com/synthaicode/Kafka.Context
 ## Docs
 - Repository map: `overview.md`
 - Contracts (Avro / DLQ / provisioning): `docs/contracts/`
+- appsettings.json guide (EN): `docs/contracts/appsettings.en.md`
 - Target usage shape: `docs/samples/target_code_shape.md`
 - Release workflow: `docs/workflows/release_roles_and_steps.md`
 - NuGet README (the package page text): `src/Kafka.Context/README.md`

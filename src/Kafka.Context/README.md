@@ -3,6 +3,7 @@
 A lightweight, opinionated Kafka + Schema Registry runtime with a context-centric, contract-first workflow (Avro).
 
 Source & docs: https://github.com/synthaicode/Kafka.Context
+appsettings.json guide (EN): https://github.com/synthaicode/Kafka.Context/blob/main/docs/contracts/appsettings.en.md
 
 This API is intentionally small.
 
