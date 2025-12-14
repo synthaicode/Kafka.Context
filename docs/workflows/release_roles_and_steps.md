@@ -8,6 +8,25 @@ Kafka.Context のリリース手順は本ファイルを正とする。
 
 ---
 
+## Release flow（Local → RC → Stable）
+
+（Ksql.Linq の運用を参考にした）推奨フロー:
+
+```mermaid
+flowchart TD
+  A["Local prep<br/>release/<version><br/>build/test + docs/diff_log<br/>(dev/owners)"] --> B["Publish RC<br/>(GitHub Packages)"]
+  B --> C["Verify RC<br/>(examples + smoke + physical evidence)"]
+  C --> D["GO decision<br/>(coordinator)"]
+  D --> E["Merge/Lock commit hash<br/>(same commit for tags)"]
+  E --> F["Tag stable v<version><br/>or CI auto-tag"]
+  F --> G["Publish to nuget.org<br/>(CI recommended)"]
+  G --> H["Aftercare<br/>docs + announcements"]
+```
+
+注: 現時点で CI（GitHub Actions）を導入していない場合は、RC/Stable publish は手動手順で実施する（後述）。
+
+---
+
 ## 1) 役割（Who does what）
 
 | Role | Owner | Responsibility |
@@ -82,6 +101,18 @@ GO 判定に必要な最低条件:
 
 ## 6) パッケージング & 公開（NuGet）
 
+### 6.0 RC publish（推奨: GitHub Packages）
+目的: nuget.org の stable publish 前に、RC を配布して利用者目線の検証を行う。
+
+推奨:
+- `release/<version>` ブランチに push → GitHub Packages へ `-rcN` を publish（CI）
+- RC を参照する `NuGet.config` で restore/install → examples と smoke を実行
+
+現状（CI未導入の暫定）:
+- この OSS に RC publish の CI を追加するまで、RC は「ローカル pack → ローカル feed」で代替する。
+  - `dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\nuget`
+  - ローカル feed を参照して examples をビルドする（必要なら `NuGet.config` を用意）
+
 ### 6.1 Pack（必須）
 ```powershell
 dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\nuget
@@ -97,10 +128,19 @@ dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\n
 ### 6.4 Push（組織の運用に従う）
 - `dotnet nuget push` は API key 管理（CI/Secret）に寄せる（ローカル直打ちは避ける）
 
+### 6.5 CI 自動化（将来の正）
+Ksql.Linq の運用に寄せる場合は、以下を導入する:
+- RC publish: `release/**` push で GitHub Packages へ publish
+- Lead signal:
+  - tracking Issue/PR に `release-ready` ラベル、または `/release-ready` コメント
+- Promote:
+  - `<Version>` を読み取り `v<version>` を `origin/main` HEAD に付与（tag push）
+- Stable publish:
+  - `v*.*.*` tag push で `dotnet test` / `dotnet pack` / `dotnet nuget push`
+
 ---
 
 ## 7) Aftercare
 - GitHub Release ノートを作成（破壊的変更/移行観点があれば明記）
 - `docs/`（契約/設定/Non-Goals）と `overview.md` の整合を確認
 - 重大不具合が出た場合は hotfix（`0.x.y+1`）で最小差分の再リリースを行う（unlist は最終手段）
-
