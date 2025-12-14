@@ -41,12 +41,8 @@ internal static class AvroGenericMapper
 
         if (targetType == typeof(decimal))
         {
-            var kafkaAttr = property.GetCustomAttribute<KafkaDecimalAttribute>(inherit: true);
-#pragma warning disable CS0618
-            var ksqlAttr = kafkaAttr is null ? property.GetCustomAttribute<KsqlDecimalAttribute>(inherit: true) : null;
-#pragma warning restore CS0618
-            if (kafkaAttr is null && ksqlAttr is null)
-                throw new InvalidOperationException($"decimal field '{property.DeclaringType?.FullName}.{property.Name}' requires [KafkaDecimal].");
+            var attr = property.GetCustomAttribute<KafkaDecimalAttribute>(inherit: true)
+                       ?? throw new InvalidOperationException($"decimal field '{property.DeclaringType?.FullName}.{property.Name}' requires [KafkaDecimal].");
 
             BigInteger unscaled;
             int scale;
@@ -60,7 +56,7 @@ internal static class AvroGenericMapper
             {
                 var bytes = (byte[])value;
                 unscaled = new BigInteger(bytes, isUnsigned: false, isBigEndian: true);
-                scale = kafkaAttr?.Scale ?? ksqlAttr!.Scale;
+                scale = attr.Scale;
             }
 
             var factor = 1m;

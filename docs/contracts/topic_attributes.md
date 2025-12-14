@@ -33,4 +33,4 @@ public class KafkaTopicAttribute : Attribute
 1. `KsqlDsl.Topics.<topicName>.Creation.*`（運用で上書き）
 2. `KafkaTopicAttribute`（コード側既定）
 
-補足: 互換性のため `KsqlTopicAttribute` などの旧名も残すが、今後は `Kafka*` を推奨する。
+補足: `Kafka*` の属性を使用する。

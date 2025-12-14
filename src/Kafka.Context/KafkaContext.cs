@@ -103,16 +103,10 @@ public abstract class KafkaContext : IAsyncDisposable
             return topic;
 
         var kafkaAttr = entityType.GetCustomAttribute<KafkaTopicAttribute>(inherit: true);
-        if (kafkaAttr is not null)
-            return kafkaAttr.Name;
+        if (kafkaAttr is null)
+            throw new InvalidOperationException($"Missing [{nameof(KafkaTopicAttribute)}] on entity type '{entityType.FullName}'.");
 
-#pragma warning disable CS0618
-        var ksqlAttr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true);
-#pragma warning restore CS0618
-        if (ksqlAttr is not null)
-            return ksqlAttr.Name;
-
-        throw new InvalidOperationException($"Missing [{nameof(KafkaTopicAttribute)}] on entity type '{entityType.FullName}'.");
+        return kafkaAttr.Name;
     }
 
     private void InitializeEventSets()
@@ -157,22 +151,10 @@ public abstract class KafkaContext : IAsyncDisposable
         {
             var entityType = typeof(T);
             var kafkaAttr = entityType.GetCustomAttribute<KafkaTopicAttribute>(inherit: true);
-            if (kafkaAttr is not null)
-            {
-                _topicByEntityType[entityType] = kafkaAttr.Name;
-                return;
-            }
+            if (kafkaAttr is null)
+                throw new InvalidOperationException($"Missing [{nameof(KafkaTopicAttribute)}] on entity type '{entityType.FullName}'.");
 
-#pragma warning disable CS0618
-            var ksqlAttr = entityType.GetCustomAttribute<KsqlTopicAttribute>(inherit: true);
-#pragma warning restore CS0618
-            if (ksqlAttr is not null)
-            {
-                _topicByEntityType[entityType] = ksqlAttr.Name;
-                return;
-            }
-
-            throw new InvalidOperationException($"Missing [{nameof(KafkaTopicAttribute)}] on entity type '{entityType.FullName}'.");
+            _topicByEntityType[entityType] = kafkaAttr.Name;
         }
     }
 }

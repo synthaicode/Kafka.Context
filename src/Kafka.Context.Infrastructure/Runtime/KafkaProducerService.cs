@@ -211,14 +211,10 @@ internal static class KafkaProducerService
 
         if (value is decimal dec)
         {
-            var kafkaAttr = property.GetCustomAttribute<Kafka.Context.Attributes.KafkaDecimalAttribute>(inherit: true);
-#pragma warning disable CS0618
-            var ksqlAttr = kafkaAttr is null ? property.GetCustomAttribute<Kafka.Context.Attributes.KsqlDecimalAttribute>(inherit: true) : null;
-#pragma warning restore CS0618
-            if (kafkaAttr is null && ksqlAttr is null)
-                throw new InvalidOperationException($"decimal field '{property.DeclaringType?.FullName}.{property.Name}' requires [KafkaDecimal].");
+            var attr = property.GetCustomAttribute<Kafka.Context.Attributes.KafkaDecimalAttribute>(inherit: true)
+                       ?? throw new InvalidOperationException($"decimal field '{property.DeclaringType?.FullName}.{property.Name}' requires [KafkaDecimal].");
 
-            var scale = kafkaAttr?.Scale ?? ksqlAttr!.Scale;
+            var scale = attr.Scale;
             var unscaled = EncodeDecimalUnscaled(dec, scale);
             return new Avro.AvroDecimal(unscaled, scale);
         }

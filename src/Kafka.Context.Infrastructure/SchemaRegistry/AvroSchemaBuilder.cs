@@ -144,8 +144,7 @@ internal static class AvroSchemaBuilder
             return;
         }
 
-        if (coreType == typeof(DateTime) ||
-            property.GetCustomAttribute<KafkaTimestampAttribute>(inherit: true) is not null)
+        if (coreType == typeof(DateTime) || property.GetCustomAttribute<KafkaTimestampAttribute>(inherit: true) is not null)
         {
             writer.WriteStartObject();
             writer.WriteString("type", "long");
@@ -153,32 +152,17 @@ internal static class AvroSchemaBuilder
             writer.WriteEndObject();
             return;
         }
-
-#pragma warning disable CS0618
-        if (property.GetCustomAttribute<KsqlTimestampAttribute>(inherit: true) is not null)
-        {
-            writer.WriteStartObject();
-            writer.WriteString("type", "long");
-            writer.WriteString("logicalType", "timestamp-millis");
-            writer.WriteEndObject();
-            return;
-        }
-#pragma warning restore CS0618
 
         if (coreType == typeof(decimal))
         {
-            var dec = property.GetCustomAttribute<KafkaDecimalAttribute>(inherit: true);
-#pragma warning disable CS0618
-            var legacyDec = dec is null ? property.GetCustomAttribute<KsqlDecimalAttribute>(inherit: true) : null;
-#pragma warning restore CS0618
-            if (dec is null && legacyDec is null)
-                throw new InvalidOperationException($"decimal field '{property.DeclaringType?.FullName}.{property.Name}' requires [{nameof(KafkaDecimalAttribute)}].");
+            var dec = property.GetCustomAttribute<KafkaDecimalAttribute>(inherit: true)
+                      ?? throw new InvalidOperationException($"decimal field '{property.DeclaringType?.FullName}.{property.Name}' requires [{nameof(KafkaDecimalAttribute)}].");
 
             writer.WriteStartObject();
             writer.WriteString("type", "bytes");
             writer.WriteString("logicalType", "decimal");
-            writer.WriteNumber("precision", dec?.Precision ?? legacyDec!.Precision);
-            writer.WriteNumber("scale", dec?.Scale ?? legacyDec!.Scale);
+            writer.WriteNumber("precision", dec.Precision);
+            writer.WriteNumber("scale", dec.Scale);
             writer.WriteEndObject();
             return;
         }
@@ -225,13 +209,8 @@ internal static class AvroSchemaBuilder
 
     private static IReadOnlyList<PropertyInfo> GetKeyProperties(Type entityType)
     {
-        var props = GetPublicReadableProperties(entityType);
-        var list = props.Where(p => p.GetCustomAttribute<KafkaKeyAttribute>(inherit: true) is not null).ToList();
-
-#pragma warning disable CS0618
-        list.AddRange(props.Where(p => p.GetCustomAttribute<KsqlKeyAttribute>(inherit: true) is not null));
-#pragma warning restore CS0618
-
-        return list.Distinct().ToList();
+        return GetPublicReadableProperties(entityType)
+            .Where(p => p.GetCustomAttribute<KafkaKeyAttribute>(inherit: true) is not null)
+            .ToList();
     }
 }
