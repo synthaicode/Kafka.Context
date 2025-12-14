@@ -10,5 +10,9 @@
     <ProjectReference Include="..\..\..\src\Kafka.Context.Application\Kafka.Context.Application.csproj" />
     <ProjectReference Include="..\..\..\src\Kafka.Context\Kafka.Context.csproj" />
   </ItemGroup>
-</Project>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+  </ItemGroup>
+</Project>

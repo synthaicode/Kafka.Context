@@ -24,31 +24,36 @@ var config = new ConfigurationBuilder()
         ["KsqlDsl:Common:ClientId"] = clientId,
         ["KsqlDsl:SchemaRegistry:Url"] = schemaRegistryUrl,
         ["KsqlDsl:DlqTopicName"] = $"dead_letter_queue_{clientId}",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:GroupId"] = $"{clientId}-orders-consumer-v1",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:AutoOffsetReset"] = "Earliest",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:AutoCommitIntervalMs"] = "5000",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:SessionTimeoutMs"] = "30000",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:HeartbeatIntervalMs"] = "3000",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:MaxPollIntervalMs"] = "300000",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:FetchMinBytes"] = "1",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:FetchMaxBytes"] = "52428800",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:IsolationLevel"] = "ReadUncommitted",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Consumer:AdditionalProperties:enable.partition.eof"] = "false",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:GroupId"] = $"{clientId}-orders-consumer-v1",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:AutoOffsetReset"] = "Earliest",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:AutoCommitIntervalMs"] = "5000",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:SessionTimeoutMs"] = "30000",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:HeartbeatIntervalMs"] = "3000",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:MaxPollIntervalMs"] = "300000",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:FetchMinBytes"] = "1",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:FetchMaxBytes"] = "52428800",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:IsolationLevel"] = "ReadUncommitted",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Consumer:AdditionalProperties:enable.partition.eof"] = "false",
 
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:Acks"] = "All",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:CompressionType"] = "Snappy",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:EnableIdempotence"] = "true",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:MaxInFlightRequestsPerConnection"] = "1",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:LingerMs"] = "5",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:BatchSize"] = "16384",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:BatchNumMessages"] = "10000",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:DeliveryTimeoutMs"] = "120000",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:RetryBackoffMs"] = "100",
-        ["KsqlDsl:Topics:physical_orders_physical_proc:Producer:AdditionalProperties:message.max.bytes"] = "1000000",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:Acks"] = "All",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:CompressionType"] = "Snappy",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:EnableIdempotence"] = "true",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:MaxInFlightRequestsPerConnection"] = "1",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:LingerMs"] = "5",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:BatchSize"] = "16384",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:BatchNumMessages"] = "10000",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:DeliveryTimeoutMs"] = "120000",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:RetryBackoffMs"] = "100",
+        ["KsqlDsl:Topics:physical_orders_physical_proc_xp:Producer:AdditionalProperties:message.max.bytes"] = "1000000",
     })
     .Build();
 
 await using var ctx = new RunnerContext(config, LoggerFactory.Create(b => b.AddConsole()));
+
+using (var provisionCts = new CancellationTokenSource(TimeSpan.FromSeconds(60)))
+{
+    await ctx.ProvisionAsync(provisionCts.Token);
+}
 
 if (string.Equals(mode, "produce", StringComparison.OrdinalIgnoreCase))
 {
@@ -84,7 +89,7 @@ if (string.Equals(mode, "produce", StringComparison.OrdinalIgnoreCase))
     return 0;
 }
 
-[KsqlTopic("physical_orders_physical_proc")]
+[KsqlTopic("physical_orders_physical_proc_xp")]
 public sealed class PhysicalOrder
 {
     public int Id { get; set; }
