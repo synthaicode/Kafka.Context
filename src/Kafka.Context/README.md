@@ -1,6 +1,6 @@
 # Kafka.Context
 
-Kafka + Schema Registry を「Context中心・契約駆動」で扱うための、軽量で意見のある I/O ランタイム（契約形式: Avro）。
+A lightweight, opinionated Kafka + Schema Registry runtime with a context-centric, contract-first workflow (Avro).
 
 ## Install
 
@@ -21,7 +21,7 @@ dotnet add package Kafka.Context
 }
 ```
 
-## Quick start
+## EF-style quick start (KafkaContext as DbContext)
 
 ```csharp
 using Kafka.Context;
@@ -36,9 +36,10 @@ public sealed class Order
     public int Id { get; set; }
 }
 
-public sealed class AppContext : KafkaContext
+// EF-like: KafkaContext ~= DbContext, EventSet<T> ~= DbSet<T>
+public sealed class AppKafkaContext : KafkaContext
 {
-    public AppContext(IConfiguration configuration, ILoggerFactory loggerFactory)
+    public AppKafkaContext(IConfiguration configuration, ILoggerFactory loggerFactory)
         : base(configuration, loggerFactory) { }
 
     public EventSet<Order> Orders { get; set; } = null!;
@@ -49,20 +50,29 @@ public sealed class AppContext : KafkaContext
 
 var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 using var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
-await using var ctx = new AppContext(config, loggerFactory);
+await using var ctx = new AppKafkaContext(config, loggerFactory);
 
 // Create/verify topics + register/verify Schema Registry subjects (fail-fast).
 await ctx.ProvisionAsync();
 
-// Produce.
+// Produce (EF-ish: AddAsync).
 await ctx.Orders.AddAsync(new Order { Id = 1 });
 
-// Consume.
+// Consume (EF-ish: ForEachAsync).
 await ctx.Orders.ForEachAsync(o =>
 {
     Console.WriteLine($"Order: {o.Id}");
     return Task.CompletedTask;
 });
+```
+
+## EF-style mapping tip (KsqlTopic on entity)
+
+`KsqlTopicAttribute` is the equivalent of mapping an entity to a table name:
+
+```csharp
+[KsqlTopic("orders")]
+public sealed class Order { /* ... */ }
 ```
 
 ## Retry / DLQ
@@ -82,7 +92,9 @@ await ctx.Dlq.ForEachAsync((env, headers, meta) =>
 
 ## Per-topic consumer/producer config
 
-`KsqlDsl.Topics.<topicName>.Consumer.*` / `KsqlDsl.Topics.<topicName>.Producer.*` で topic 別に Confluent.Kafka の設定を上書きできます。
+You can override Confluent.Kafka settings per topic via:
+- `KsqlDsl.Topics.<topicName>.Consumer.*`
+- `KsqlDsl.Topics.<topicName>.Producer.*`
 
 ## Preview Avro before Schema Registry registration
 
@@ -91,4 +103,3 @@ var plans = ctx.PreviewSchemaRegistryAvro();
 foreach (var p in plans)
     Console.WriteLine($"{p.ValueSubject} => {p.ExpectedValueRecordFullName}");
 ```
-
