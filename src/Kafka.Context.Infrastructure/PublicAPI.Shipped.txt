@@ -1,0 +1,30 @@
+#nullable enable
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreview
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.<Clone>$() -> Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult!
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.Deconstruct(out string! TopicName, out string! EntityType, out int KeyPropertyCount, out string! KeySubject, out string? KeySchemaJson, out string! ValueSubject, out string! ValueSchemaJson, out string! ExpectedValueRecordFullName) -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.EntityType.get -> string!
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.EntityType.init -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.Equals(Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult? other) -> bool
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.ExpectedValueRecordFullName.get -> string!
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.ExpectedValueRecordFullName.init -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.KeyPropertyCount.get -> int
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.KeyPropertyCount.init -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.KeySchemaJson.get -> string?
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.KeySchemaJson.init -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.KeySubject.get -> string!
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.KeySubject.init -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.SchemaRegistryAvroPreviewResult(string! TopicName, string! EntityType, int KeyPropertyCount, string! KeySubject, string? KeySchemaJson, string! ValueSubject, string! ValueSchemaJson, string! ExpectedValueRecordFullName) -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.TopicName.get -> string!
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.TopicName.init -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.ValueSchemaJson.get -> string!
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.ValueSchemaJson.init -> void
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.ValueSubject.get -> string!
+Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.ValueSubject.init -> void
+override Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.Equals(object? obj) -> bool
+override Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.GetHashCode() -> int
+override Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.ToString() -> string!
+static Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreview.Build(string! topicName, System.Type! entityType) -> Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult!
+static Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.operator !=(Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult? left, Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult? right) -> bool
+static Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult.operator ==(Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult? left, Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreviewResult? right) -> bool
+

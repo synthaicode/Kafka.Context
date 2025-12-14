@@ -10,9 +10,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="4.14.0" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Confluent.SchemaRegistry" Version="2.8.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="PublicAPI.Shipped.txt" />
+    <None Remove="PublicAPI.Unshipped.txt" />
+    <Content Remove="PublicAPI.Shipped.txt" />
+    <Content Remove="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(StrictPublicApi)' != 'true'">
+    <NoWarn>$(NoWarn);RS0016;RS0017</NoWarn>
+  </PropertyGroup>
 </Project>

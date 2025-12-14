@@ -45,6 +45,9 @@ jobs:
       - name: Restore
         run: dotnet restore
 
+      - name: Public API check (strict)
+        run: dotnet build Kafka.Context.sln -c Release -p:StrictPublicApi=true -warnaserror:RS0016,RS0017
+
       - name: Unit tests
         run: dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release
 
@@ -59,4 +62,3 @@ jobs:
             --api-key "$GITHUB_TOKEN" \
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
             --skip-duplicate
-

@@ -62,6 +62,11 @@ NuGet のバージョンは以下のいずれかで一元管理する:
 - NuGet 表示 README（`src/Kafka.Context/README.md`）が最新（QuickStart / Non-Goals / 設定 / DLQ / Preview 等）
 - `examples/` がビルド可能（少なくとも QuickStart 相当）
 
+### 3.3 Public API check（必須）
+```powershell
+dotnet build Kafka.Context.sln -c Release -p:StrictPublicApi=true -warnaserror:RS0016,RS0017
+```
+
 ---
 
 ## 4) テスト手順（Must run）

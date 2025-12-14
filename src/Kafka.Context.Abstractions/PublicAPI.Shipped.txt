@@ -1,0 +1,19 @@
+#nullable enable
+Kafka.Context.Abstractions.IModelBuilder
+Kafka.Context.Abstractions.IModelBuilder.Entity<T>() -> void
+Kafka.Context.Attributes.KsqlDecimalAttribute
+Kafka.Context.Attributes.KsqlDecimalAttribute.KsqlDecimalAttribute(int precision, int scale) -> void
+Kafka.Context.Attributes.KsqlDecimalAttribute.Precision.get -> int
+Kafka.Context.Attributes.KsqlDecimalAttribute.Scale.get -> int
+Kafka.Context.Attributes.KsqlKeyAttribute
+Kafka.Context.Attributes.KsqlKeyAttribute.KsqlKeyAttribute() -> void
+Kafka.Context.Attributes.KsqlTimestampAttribute
+Kafka.Context.Attributes.KsqlTimestampAttribute.KsqlTimestampAttribute() -> void
+Kafka.Context.Attributes.KsqlTopicAttribute
+Kafka.Context.Attributes.KsqlTopicAttribute.KsqlTopicAttribute(string! name) -> void
+Kafka.Context.Attributes.KsqlTopicAttribute.Name.get -> string!
+Kafka.Context.Attributes.KsqlTopicAttribute.PartitionCount.get -> int
+Kafka.Context.Attributes.KsqlTopicAttribute.PartitionCount.set -> void
+Kafka.Context.Attributes.KsqlTopicAttribute.ReplicationFactor.get -> short
+Kafka.Context.Attributes.KsqlTopicAttribute.ReplicationFactor.set -> void
+
