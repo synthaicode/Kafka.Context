@@ -10,20 +10,19 @@ Kafka.Context のリリース手順は本ファイルを正とする。
 
 ## Release flow（Local → RC → Stable）
 
-（Ksql.Linq の運用を参考にした）推奨フロー:
+（Ksql.Linq の運用を参考にした）本 OSS の基本フロー:
 
 ```mermaid
 flowchart TD
   A["Local prep<br/>release/<version><br/>build/test + docs/diff_log<br/>(dev/owners)"] --> B["Publish RC<br/>(GitHub Packages)"]
-  B --> C["Verify RC<br/>(examples + smoke + physical evidence)"]
+  B --> C["Download RC & verify<br/>(restore + examples + smoke + physical evidence)"]
   C --> D["GO decision<br/>(coordinator)"]
-  D --> E["Merge/Lock commit hash<br/>(same commit for tags)"]
-  E --> F["Tag stable v<version><br/>or CI auto-tag"]
-  F --> G["Publish to nuget.org<br/>(CI recommended)"]
-  G --> H["Aftercare<br/>docs + announcements"]
+  D --> E["Lock commit hash<br/>(no commits after GO)"]
+  E --> F["Publish stable to nuget.org<br/>(same commit hash)"]
+  F --> G["Aftercare<br/>docs + announcements"]
 ```
 
-注: 現時点で CI（GitHub Actions）を導入していない場合は、RC/Stable publish は手動手順で実施する（後述）。
+注: CI（GitHub Actions）を導入していない場合は、GitHub Packages / nuget.org への publish は手動で行う（後述）。
 
 ---
 
@@ -101,17 +100,42 @@ GO 判定に必要な最低条件:
 
 ## 6) パッケージング & 公開（NuGet）
 
-### 6.0 RC publish（推奨: GitHub Packages）
-目的: nuget.org の stable publish 前に、RC を配布して利用者目線の検証を行う。
+### 6.0 RC publish（必須: GitHub Packages）
+目的: nuget.org の stable publish 前に、RC を配布して「DL→動作確認」を行う。
 
-推奨:
-- `release/<version>` ブランチに push → GitHub Packages へ `-rcN` を publish（CI）
-- RC を参照する `NuGet.config` で restore/install → examples と smoke を実行
+#### 6.0.1 RC pack（ローカル）
+`<version>-rcN` を明示して pack する（例: `0.1.0-rc1`）。
 
-現状（CI未導入の暫定）:
-- この OSS に RC publish の CI を追加するまで、RC は「ローカル pack → ローカル feed」で代替する。
-  - `dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\nuget`
-  - ローカル feed を参照して examples をビルドする（必要なら `NuGet.config` を用意）
+```powershell
+dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\nuget -p:Version=0.1.0-rc1
+```
+
+#### 6.0.2 RC publish（GitHub Packages）
+GitHub Packages を NuGet feed として使う。
+
+```powershell
+# owner は GitHub org/user 名
+$owner = "<OWNER>"
+$gpr = "https://nuget.pkg.github.com/$owner/index.json"
+
+dotnet nuget push .\\artifacts\\nuget\\Kafka.Context.0.1.0-rc1.nupkg -s $gpr -k "<GITHUB_TOKEN_WITH_PACKAGES>"
+```
+
+#### 6.0.3 RC download & verify（利用者目線の検証）
+RC を **ダウンロード（restore/install）して**、examples + smoke + physical を確認する。
+
+- RC を参照する `NuGet.config`（または `dotnet nuget add source`）を用意
+- examples を RC で restore してビルド/実行
+- Windows 物理テストを実行し証跡を残す（`reports/physical/`）
+
+（例: source 登録）
+```powershell
+$owner = "<OWNER>"
+$gpr = "https://nuget.pkg.github.com/$owner/index.json"
+dotnet nuget add source $gpr -n github -u $owner -p "<GITHUB_TOKEN_WITH_PACKAGES>" --store-password-in-clear-text
+```
+
+---
 
 ### 6.1 Pack（必須）
 ```powershell
@@ -125,8 +149,16 @@ dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\n
 ### 6.3 Tag（推奨）
 - `v<version>`（例: `v0.1.0`）を **GO 済み commit hash** に付与する
 
-### 6.4 Push（組織の運用に従う）
-- `dotnet nuget push` は API key 管理（CI/Secret）に寄せる（ローカル直打ちは避ける）
+### 6.4 Stable publish（nuget.org）
+GO 後は commit hash をロックし、同一 commit hash から stable を publish する。
+
+```powershell
+# stable pack（例: 0.1.0）
+dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o .\\artifacts\\nuget -p:Version=0.1.0
+
+# publish to nuget.org
+dotnet nuget push .\\artifacts\\nuget\\Kafka.Context.0.1.0.nupkg -s https://api.nuget.org/v3/index.json -k "<NUGET_API_KEY>"
+```
 
 ### 6.5 CI 自動化（将来の正）
 Ksql.Linq の運用に寄せる場合は、以下を導入する:
