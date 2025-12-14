@@ -74,6 +74,24 @@ public abstract class KafkaContext : IAsyncDisposable
         return Kafka.Context.Provisioning.Provisioner.ProvisionAsync(this, cancellationToken);
     }
 
+    public IReadOnlyList<SchemaRegistryAvroPlan> PreviewSchemaRegistryAvro()
+    {
+        var plans = new List<SchemaRegistryAvroPlan>();
+
+        foreach (var entityType in GetEntityTypes())
+        {
+            var topicName = GetTopicNameFor(entityType);
+            var preview = Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreview.Build(topicName, entityType);
+            plans.Add(SchemaRegistryAvroPlan.From(preview));
+        }
+
+        var dlqTopic = GetDlqTopicName();
+        var dlqPreview = Kafka.Context.Infrastructure.SchemaRegistry.SchemaRegistryAvroPreview.Build(dlqTopic, typeof(Kafka.Context.Messaging.DlqEnvelope));
+        plans.Add(SchemaRegistryAvroPlan.From(dlqPreview));
+
+        return plans;
+    }
+
     internal string GetDlqTopicName()
     {
         return string.IsNullOrWhiteSpace(Options.DlqTopicName) ? "dead_letter_queue" : Options.DlqTopicName;
