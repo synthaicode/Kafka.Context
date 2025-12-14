@@ -52,13 +52,20 @@ jobs:
         run: dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release
 
       - name: Pack (RC)
-        run: dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+        run: |
+          dotnet pack src/Kafka.Context.Abstractions/Kafka.Context.Abstractions.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Messaging/Kafka.Context.Messaging.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Application/Kafka.Context.Application.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Infrastructure/Kafka.Context.Infrastructure.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
 
       - name: Push to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet nuget push ./artifacts/nuget/Kafka.Context.${{ steps.ver.outputs.version }}.nupkg \
-            --api-key "$GITHUB_TOKEN" \
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-            --skip-duplicate
+          for pkg in ./artifacts/nuget/*.nupkg; do
+            dotnet nuget push "$pkg" \
+              --api-key "$GITHUB_TOKEN" \
+              --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+              --skip-duplicate
+          done
