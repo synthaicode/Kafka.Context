@@ -8,14 +8,17 @@ public sealed class EventSet<T>
 {
     private readonly KafkaContext _context;
     private ErrorHandlingPolicy _policy = new();
-    private readonly Dictionary<object, Action> _manualCommit = new();
+    private readonly Dictionary<MessageMeta, Action> _manualCommit = new();
 
     public EventSet(KafkaContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public Task AddAsync(T entity, CancellationToken cancellationToken = default)
+    public Task AddAsync(T entity)
+        => AddAsync(entity, CancellationToken.None);
+
+    public Task AddAsync(T entity, CancellationToken cancellationToken)
     {
         return Kafka.Context.Infrastructure.Runtime.KafkaProducerService.ProduceAsync(
             _context.Options,
@@ -126,10 +129,10 @@ public sealed class EventSet<T>
                 try
                 {
                     await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit, (e) => action(e, headers, meta)).ConfigureAwait(false);
-                }
-                finally
-                {
-                    if (!autoCommit && _manualCommit.Remove(entity!))
+                 }
+                 finally
+                 {
+                    if (!autoCommit && _manualCommit.Remove(meta))
                     {
                         _context.Logger?.LogWarning(
                             "Manual commit was not called for {EntityType} on {Topic} offset {Offset}",
@@ -166,10 +169,10 @@ public sealed class EventSet<T>
                 try
                 {
                     await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit, (e) => action(e, headers, meta)).ConfigureAwait(false);
-                }
-                finally
-                {
-                    if (!autoCommit && _manualCommit.Remove(entity!))
+                 }
+                 finally
+                 {
+                    if (!autoCommit && _manualCommit.Remove(meta))
                     {
                         _context.Logger?.LogWarning(
                             "Manual commit was not called for {EntityType} on {Topic} offset {Offset}",
@@ -210,28 +213,28 @@ public sealed class EventSet<T>
             cts.Token);
     }
 
-    public void Commit(T entity)
+    public void Commit(MessageMeta meta)
     {
-        if (entity is null) throw new ArgumentNullException(nameof(entity));
+        if (meta is null) throw new ArgumentNullException(nameof(meta));
 
-        if (_manualCommit.TryGetValue(entity!, out var commit))
+        if (_manualCommit.TryGetValue(meta, out var commit))
         {
             commit();
-            _manualCommit.Remove(entity!);
+            _manualCommit.Remove(meta);
             KafkaContextMetrics.ManualCommit(typeof(T).Name, GetTopicName());
             return;
         }
 
-        throw new InvalidOperationException("No pending commit found for the specified entity. Commit(entity) is only valid during ForEachAsync(..., autoCommit:false).");
+        throw new InvalidOperationException("No pending commit found for the specified meta. Commit(meta) is only valid during ForEachAsync(..., autoCommit:false).");
     }
 
     internal string GetTopicName() => _context.GetTopicNameFor(typeof(T));
 
     internal ErrorHandlingPolicy Policy => _policy;
 
-    private void RegisterManualCommit(object entity, Action commit)
+    private void RegisterManualCommit(MessageMeta meta, Action commit)
     {
-        _manualCommit[entity] = commit;
+        _manualCommit[meta] = commit;
     }
 
     private async Task ExecuteWithPolicyAsync(T entity, Dictionary<string, string> headers, MessageMeta meta, bool autoCommit, Func<T, Task> action)
@@ -287,7 +290,7 @@ public sealed class EventSet<T>
             }
 
             if (!autoCommit)
-                Commit(entity);
+                Commit(meta);
         }
     }
 

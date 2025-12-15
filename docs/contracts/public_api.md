@@ -17,9 +17,9 @@
 - `Task ForEachAsync(Func<T, Dictionary<string, string>, MessageMeta, Task> action, TimeSpan timeout)`
 
 ### Manual commit (when `autoCommit=false`)
-- `void Commit(T entity)`
+- `void Commit(MessageMeta meta)`
 
-Note: MVP の manual commit は **record 単位のみ**。`Commit(entity)` は `ForEachAsync(..., autoCommit:false)` のハンドラ内で呼ぶ。
+Note: MVP の manual commit は **record 単位のみ**。`Commit(meta)` は `ForEachAsync(..., autoCommit:false)` のハンドラ内で呼ぶ。
 
 ## EventSet<T>.AddAsync（MVP）
 - `Task AddAsync(T entity)`

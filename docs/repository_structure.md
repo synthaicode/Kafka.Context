@@ -19,7 +19,7 @@
 │
 ├─ examples/
 │  ├─ quickstart/                    # minimal AddAsync/ForEachAsync
-│  ├─ manual-commit/                 # autoCommit=false + Commit(entity)
+│  ├─ manual-commit/                 # autoCommit=false + Commit(meta)
 │  └─ error-handling-dlq/            # retry + DLQ
 │
 ├─ docs/

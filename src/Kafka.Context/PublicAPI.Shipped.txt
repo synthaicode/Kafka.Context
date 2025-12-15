@@ -11,8 +11,9 @@ Kafka.Context.ErrorAction.DLQ = 2 -> Kafka.Context.ErrorAction
 Kafka.Context.ErrorAction.Retry = 1 -> Kafka.Context.ErrorAction
 Kafka.Context.ErrorAction.Skip = 0 -> Kafka.Context.ErrorAction
 Kafka.Context.EventSet<T>
-Kafka.Context.EventSet<T>.AddAsync(T entity, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Kafka.Context.EventSet<T>.Commit(T entity) -> void
+Kafka.Context.EventSet<T>.AddAsync(T entity) -> System.Threading.Tasks.Task!
+Kafka.Context.EventSet<T>.AddAsync(T entity, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Kafka.Context.EventSet<T>.Commit(Kafka.Context.Messaging.MessageMeta! meta) -> void
 Kafka.Context.EventSet<T>.EventSet(Kafka.Context.KafkaContext! context) -> void
 Kafka.Context.EventSet<T>.ForEachAsync(System.Func<T, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action, bool autoCommit) -> System.Threading.Tasks.Task!
 Kafka.Context.EventSet<T>.ForEachAsync(System.Func<T, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action, System.TimeSpan timeout) -> System.Threading.Tasks.Task!
@@ -66,4 +67,3 @@ static Kafka.Context.SchemaRegistryAvroPlan.operator !=(Kafka.Context.SchemaRegi
 static Kafka.Context.SchemaRegistryAvroPlan.operator ==(Kafka.Context.SchemaRegistryAvroPlan? left, Kafka.Context.SchemaRegistryAvroPlan? right) -> bool
 virtual Kafka.Context.KafkaContext.DisposeAsync() -> System.Threading.Tasks.ValueTask
 virtual Kafka.Context.KafkaContext.OnModelCreating(Kafka.Context.Abstractions.IModelBuilder! modelBuilder) -> void
-

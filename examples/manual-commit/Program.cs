@@ -34,11 +34,11 @@ internal static class Program
             ["source"] = "manual-commit",
         });
 
-        await context.Orders.ForEachAsync((order, headers, meta) =>
-        {
-            Console.WriteLine($"Processing order {order.OrderId}: {order.Amount} (traceId={headers.GetValueOrDefault("traceId", "-")})");
-            context.Orders.Commit(order);
-            return Task.CompletedTask;
-        }, autoCommit: false);
-    }
+         await context.Orders.ForEachAsync((order, headers, meta) =>
+         {
+             Console.WriteLine($"Processing order {order.OrderId}: {order.Amount} (traceId={headers.GetValueOrDefault("traceId", "-")})");
+            context.Orders.Commit(meta);
+             return Task.CompletedTask;
+         }, autoCommit: false);
+     }
 }

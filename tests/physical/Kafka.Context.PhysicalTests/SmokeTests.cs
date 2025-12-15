@@ -146,7 +146,7 @@ public sealed class SmokeTests
                     if (order.OrderId == 1)
                     {
                         Assert.Equal("mc-1", headers.GetValueOrDefault("traceId"));
-                        ctx1.ManualOrders.Commit(order);
+                        ctx1.ManualOrders.Commit(meta);
                         gotFirst.TrySetResult(meta);
                         cts.Cancel();
                     }
@@ -181,7 +181,7 @@ public sealed class SmokeTests
                     if (order.OrderId == 2)
                     {
                         Assert.Equal("mc-2", headers.GetValueOrDefault("traceId"));
-                        ctx2.ManualOrders.Commit(order);
+                        ctx2.ManualOrders.Commit(meta);
                         gotSecond.TrySetResult(meta);
                         cts.Cancel();
                     }

@@ -122,7 +122,7 @@ class Program
         await context.Orders.ForEachAsync(async (order, headers, meta) =>
         {
             Console.WriteLine($"Processing order {order.OrderId}: {order.Amount}");
-            context.Orders.Commit(order);
+            context.Orders.Commit(meta);
         }, autoCommit: false);
     }
 }

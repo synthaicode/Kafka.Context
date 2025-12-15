@@ -50,7 +50,7 @@ catch (Exception ex)
         await _dlqProducer.ProduceAsync(env, linkedCts.Token).ConfigureAwait(false);
     }
     if (!autoCommit)
-        _commitManager?.Commit(entity);
+        _commitManager?.Commit(meta);
 }
 ```
 
@@ -58,4 +58,3 @@ catch (Exception ex)
 - Retry: `docs/contracts/retry.md`
 - DLQ: `docs/contracts/dlq.md`
 - Mapping failure: `docs/contracts/mapping_failures.md`
-

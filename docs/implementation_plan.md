@@ -30,7 +30,7 @@
 - `EventSet<T>`
   - `AddAsync(...)`（最小）
   - `ForEachAsync(...)` overload 群（`docs/contracts/public_api.md`）
-  - `Commit(T entity)`（manual commit）
+  - `Commit(MessageMeta meta)`（manual commit）
 - attributes
   - `KafkaTopicAttribute`（topic metadata）
   - key/timestamp/decimal 等（必要最小）

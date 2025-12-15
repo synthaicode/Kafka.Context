@@ -1,4 +1,3 @@
 # manual-commit
 
-`autoCommit:false` + `Commit(entity)` のサンプル。
-
+`autoCommit:false` + `Commit(meta)` のサンプル。

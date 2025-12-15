@@ -18,7 +18,7 @@ internal static class KafkaConsumerService
         string topic,
         Func<T, Dictionary<string, string>, MessageMeta, Task> action,
         bool autoCommit,
-        Action<object, Action> registerCommit,
+        Action<MessageMeta, Action> registerCommit,
         Func<string, int, long, string, Dictionary<string, string>, bool, Exception, Task>? onMappingError,
         CancellationToken cancellationToken)
     {
@@ -98,9 +98,7 @@ internal static class KafkaConsumerService
             }
 
             if (!autoCommit)
-            {
-                registerCommit(entity!, () => consumer.Commit(result));
-            }
+                registerCommit(meta, () => consumer.Commit(result));
 
             await action(entity, headers, meta).ConfigureAwait(false);
             logger?.LogDebug("Consumed {Topic} {Partition}:{Offset}", result.Topic, result.Partition.Value, result.Offset.Value);
