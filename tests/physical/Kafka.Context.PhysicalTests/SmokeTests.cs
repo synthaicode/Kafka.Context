@@ -1,4 +1,8 @@
 using Confluent.Kafka;
+using Confluent.Kafka.Admin;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes;
+using Avro.Generic;
 using Kafka.Context.Attributes;
 using Kafka.Context.Abstractions;
 using Kafka.Context.Messaging;
@@ -252,6 +256,179 @@ public sealed class SmokeTests
         });
     }
 
+    [Fact]
+    public async Task DynamicTopicSet_Consumes_AvroKey_And_AvroValue()
+    {
+        if (!IsEnabled())
+            return;
+
+        await RunWithRetryAsync(async () =>
+        {
+            var topic = $"physical_dynamic_avro_key_{Guid.NewGuid():N}";
+            var clientId = $"physical-dyn-{Guid.NewGuid():N}";
+            var groupId = $"physical-dyn-group-{Guid.NewGuid():N}";
+
+            await EnsureTopicAsync("127.0.0.1:39092", topic);
+
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["KsqlDsl:Common:BootstrapServers"] = "127.0.0.1:39092",
+                    ["KsqlDsl:Common:ClientId"] = clientId,
+                    ["KsqlDsl:SchemaRegistry:Url"] = "http://127.0.0.1:18081",
+                    ["KsqlDsl:DlqTopicName"] = $"dead_letter_queue_{clientId}",
+                    [$"KsqlDsl:Topics:{topic}:Consumer:GroupId"] = groupId,
+                    [$"KsqlDsl:Topics:{topic}:Consumer:AutoOffsetReset"] = "Earliest",
+                })
+                .Build();
+
+            var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+            await using var ctx = new PhysicalDynamicContext(config, loggerFactory);
+
+            var windowStart = DateTimeOffset.UtcNow.AddMinutes(-1).ToUnixTimeMilliseconds();
+            var windowEnd = DateTimeOffset.UtcNow.AddMinutes(0).ToUnixTimeMilliseconds();
+
+            var keySchema = (Avro.RecordSchema)Avro.Schema.Parse("""
+            {"type":"record","name":"WindowKey","namespace":"physical","fields":[
+              {"name":"id","type":"int"},
+              {"name":"windowStart","type":"long"},
+              {"name":"windowEnd","type":"long"}
+            ]}
+            """);
+
+            var valueSchema = (Avro.RecordSchema)Avro.Schema.Parse("""
+            {"type":"record","name":"OrderAgg","namespace":"physical","fields":[
+              {"name":"amount","type":"double"}
+            ]}
+            """);
+
+            var key = new GenericRecord(keySchema);
+            key.Add("id", 1);
+            key.Add("windowStart", windowStart);
+            key.Add("windowEnd", windowEnd);
+
+            var value = new GenericRecord(valueSchema);
+            value.Add("amount", 12.5d);
+
+            await ProduceAsync(
+                bootstrapServers: "127.0.0.1:39092",
+                schemaRegistryUrl: "http://127.0.0.1:18081",
+                topic: topic,
+                key: key,
+                value: value,
+                headers: new Dictionary<string, string> { ["traceId"] = "dyn-avro-key" });
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var got = new TaskCompletionSource<(object? Key, GenericRecord Value)>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            var consumeTask = ctx.Topic(topic).ForEachAsync((k, v, headers, meta) =>
+            {
+                if (meta.Topic != topic)
+                    return Task.CompletedTask;
+
+                Assert.True(headers.TryGetValue("traceId", out var traceId));
+                Assert.Equal("dyn-avro-key", traceId);
+
+                got.TrySetResult((k, v));
+                cts.Cancel();
+                return Task.CompletedTask;
+            }, cts.Token);
+
+            var completed = await Task.WhenAny(got.Task, Task.Delay(TimeSpan.FromSeconds(20), CancellationToken.None));
+            Assert.Equal(got.Task, completed);
+
+            var (gotKey, gotValue) = await got.Task;
+
+            var gotKeyRecord = Assert.IsType<GenericRecord>(gotKey);
+            Assert.Equal(1, (int)gotKeyRecord["id"]);
+            Assert.Equal(windowStart, (long)gotKeyRecord["windowStart"]);
+            Assert.Equal(windowEnd, (long)gotKeyRecord["windowEnd"]);
+
+            Assert.Equal(12.5d, (double)gotValue["amount"]);
+
+            await consumeTask;
+        });
+    }
+
+    [Fact]
+    public async Task DynamicTopicSet_KeyIsByteArray_WhenKeyIsNotConfluentAvro()
+    {
+        if (!IsEnabled())
+            return;
+
+        await RunWithRetryAsync(async () =>
+        {
+            var topic = $"physical_dynamic_raw_key_{Guid.NewGuid():N}";
+            var clientId = $"physical-dyn-{Guid.NewGuid():N}";
+            var groupId = $"physical-dyn-group-{Guid.NewGuid():N}";
+
+            await EnsureTopicAsync("127.0.0.1:39092", topic);
+
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["KsqlDsl:Common:BootstrapServers"] = "127.0.0.1:39092",
+                    ["KsqlDsl:Common:ClientId"] = clientId,
+                    ["KsqlDsl:SchemaRegistry:Url"] = "http://127.0.0.1:18081",
+                    ["KsqlDsl:DlqTopicName"] = $"dead_letter_queue_{clientId}",
+                    [$"KsqlDsl:Topics:{topic}:Consumer:GroupId"] = groupId,
+                    [$"KsqlDsl:Topics:{topic}:Consumer:AutoOffsetReset"] = "Earliest",
+                })
+                .Build();
+
+            var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+            await using var ctx = new PhysicalDynamicContext(config, loggerFactory);
+
+            var valueSchema = (Avro.RecordSchema)Avro.Schema.Parse("""
+            {"type":"record","name":"OrderValue","namespace":"physical","fields":[
+              {"name":"id","type":"int"},
+              {"name":"amount","type":"double"}
+            ]}
+            """);
+
+            var value = new GenericRecord(valueSchema);
+            value.Add("id", 7);
+            value.Add("amount", 3.5d);
+
+            var rawKey = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+
+            await ProduceAsync(
+                bootstrapServers: "127.0.0.1:39092",
+                schemaRegistryUrl: "http://127.0.0.1:18081",
+                topic: topic,
+                key: rawKey,
+                value: value,
+                headers: new Dictionary<string, string> { ["traceId"] = "dyn-raw-key" });
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var got = new TaskCompletionSource<(object? Key, GenericRecord Value)>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            var consumeTask = ctx.Topic(topic).ForEachAsync((k, v, headers, meta) =>
+            {
+                if (meta.Topic != topic)
+                    return Task.CompletedTask;
+
+                Assert.True(headers.TryGetValue("traceId", out var traceId));
+                Assert.Equal("dyn-raw-key", traceId);
+
+                got.TrySetResult((k, v));
+                cts.Cancel();
+                return Task.CompletedTask;
+            }, cts.Token);
+
+            var completed = await Task.WhenAny(got.Task, Task.Delay(TimeSpan.FromSeconds(20), CancellationToken.None));
+            Assert.Equal(got.Task, completed);
+
+            var (gotKey, gotValue) = await got.Task;
+            Assert.IsType<byte[]>(gotKey);
+            Assert.Equal(rawKey, (byte[])gotKey!);
+            Assert.Equal(7, (int)gotValue["id"]);
+            Assert.Equal(3.5d, (double)gotValue["amount"]);
+
+            await consumeTask;
+        });
+    }
+
     private static bool IsEnabled()
         => string.Equals(Environment.GetEnvironmentVariable("KAFKA_CONTEXT_PHYSICAL"), "1", StringComparison.Ordinal);
 
@@ -406,5 +583,95 @@ public sealed class SmokeTests
         {
             modelBuilder.Entity<ManualCommitOrder>();
         }
+    }
+
+    private sealed class PhysicalDynamicContext : KafkaContext
+    {
+        public PhysicalDynamicContext(IConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(configuration, loggerFactory) { }
+    }
+
+    private static async Task EnsureTopicAsync(string bootstrapServers, string topic)
+    {
+        using var admin = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = bootstrapServers }).Build();
+        try
+        {
+            await admin.CreateTopicsAsync(new[]
+            {
+                new TopicSpecification
+                {
+                    Name = topic,
+                    NumPartitions = 1,
+                    ReplicationFactor = 1
+                }
+            }).ConfigureAwait(false);
+        }
+        catch (CreateTopicsException ex) when (ex.Results.Any(r => r.Error.Code == ErrorCode.TopicAlreadyExists))
+        {
+        }
+    }
+
+    private static async Task ProduceAsync(
+        string bootstrapServers,
+        string schemaRegistryUrl,
+        string topic,
+        GenericRecord key,
+        GenericRecord value,
+        Dictionary<string, string>? headers)
+    {
+        var producerConfig = new ProducerConfig
+        {
+            BootstrapServers = bootstrapServers,
+            ClientId = $"physical-producer-{Guid.NewGuid():N}"
+        };
+
+        using var schemaRegistry = new CachedSchemaRegistryClient(new SchemaRegistryConfig { Url = schemaRegistryUrl });
+        using var producer = new ProducerBuilder<GenericRecord, GenericRecord>(producerConfig)
+            .SetKeySerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
+            .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
+            .Build();
+
+        var msg = new Message<GenericRecord, GenericRecord> { Key = key, Value = value };
+        if (headers is not null && headers.Count > 0)
+        {
+            msg.Headers = new Headers();
+            foreach (var kv in headers)
+                msg.Headers.Add(kv.Key, System.Text.Encoding.UTF8.GetBytes(kv.Value));
+        }
+
+        _ = await producer.ProduceAsync(topic, msg).ConfigureAwait(false);
+        producer.Flush(TimeSpan.FromSeconds(10));
+    }
+
+    private static async Task ProduceAsync(
+        string bootstrapServers,
+        string schemaRegistryUrl,
+        string topic,
+        byte[] key,
+        GenericRecord value,
+        Dictionary<string, string>? headers)
+    {
+        var producerConfig = new ProducerConfig
+        {
+            BootstrapServers = bootstrapServers,
+            ClientId = $"physical-producer-{Guid.NewGuid():N}"
+        };
+
+        using var schemaRegistry = new CachedSchemaRegistryClient(new SchemaRegistryConfig { Url = schemaRegistryUrl });
+        using var producer = new ProducerBuilder<byte[], GenericRecord>(producerConfig)
+            .SetKeySerializer(Serializers.ByteArray)
+            .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
+            .Build();
+
+        var msg = new Message<byte[], GenericRecord> { Key = key, Value = value };
+        if (headers is not null && headers.Count > 0)
+        {
+            msg.Headers = new Headers();
+            foreach (var kv in headers)
+                msg.Headers.Add(kv.Key, System.Text.Encoding.UTF8.GetBytes(kv.Value));
+        }
+
+        _ = await producer.ProduceAsync(topic, msg).ConfigureAwait(false);
+        producer.Flush(TimeSpan.FromSeconds(10));
     }
 }
