@@ -25,6 +25,22 @@ public sealed class EventSet<T>
             cancellationToken);
     }
 
+    public Task AddAsync(T entity, Dictionary<string, string> headers)
+        => AddAsync(entity, headers, CancellationToken.None);
+
+    public Task AddAsync(T entity, Dictionary<string, string> headers, CancellationToken cancellationToken)
+    {
+        if (headers is null) throw new ArgumentNullException(nameof(headers));
+
+        return Kafka.Context.Infrastructure.Runtime.KafkaProducerService.ProduceAsync(
+            _context.Options,
+            _context.LoggerFactory,
+            GetTopicName(),
+            entity!,
+            headers,
+            cancellationToken);
+    }
+
     public EventSet<T> OnError(ErrorAction action)
     {
         _policy = _policy with { ErrorAction = action, RetryEnabled = _policy.RetryEnabled || action == ErrorAction.Retry };

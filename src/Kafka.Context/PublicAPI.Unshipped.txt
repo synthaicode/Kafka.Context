@@ -1,2 +1,3 @@
 #nullable enable
-
+Kafka.Context.EventSet<T>.AddAsync(T entity, System.Collections.Generic.Dictionary<string!, string!>! headers) -> System.Threading.Tasks.Task!
+Kafka.Context.EventSet<T>.AddAsync(T entity, System.Collections.Generic.Dictionary<string!, string!>! headers, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!

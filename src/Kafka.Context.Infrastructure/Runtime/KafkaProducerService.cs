@@ -8,12 +8,16 @@ using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.Numerics;
 using System.Reflection;
+using System.Text;
 
 namespace Kafka.Context.Infrastructure.Runtime;
 
 internal static class KafkaProducerService
 {
     public static async Task ProduceAsync<T>(KsqlDslOptions options, ILoggerFactory? loggerFactory, string topic, T entity, CancellationToken cancellationToken)
+        => await ProduceAsync(options, loggerFactory, topic, entity, headers: null, cancellationToken).ConfigureAwait(false);
+
+    public static async Task ProduceAsync<T>(KsqlDslOptions options, ILoggerFactory? loggerFactory, string topic, T entity, Dictionary<string, string>? headers, CancellationToken cancellationToken)
     {
         if (options is null) throw new ArgumentNullException(nameof(options));
         if (string.IsNullOrWhiteSpace(topic)) throw new ArgumentException("topic required", nameof(topic));
@@ -47,7 +51,23 @@ internal static class KafkaProducerService
             .Build();
 
         var message = new Message<Null, GenericRecord> { Value = record };
+        if (headers is not null && headers.Count > 0)
+            message.Headers = CreateHeaders(headers);
         _ = await producer.ProduceAsync(topic, message).ConfigureAwait(false);
+    }
+
+    private static Headers CreateHeaders(Dictionary<string, string> headers)
+    {
+        var kafkaHeaders = new Headers();
+        foreach (var kv in headers)
+        {
+            if (string.IsNullOrWhiteSpace(kv.Key))
+                continue;
+
+            var bytes = Encoding.UTF8.GetBytes(kv.Value ?? string.Empty);
+            kafkaHeaders.Add(kv.Key, bytes);
+        }
+        return kafkaHeaders;
     }
 
     private static void ApplyTopicProducerConfig(KsqlDslOptions options, string topic, ProducerConfig producerConfig)

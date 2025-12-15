@@ -77,6 +77,9 @@ await ctx.ProvisionAsync();
 // Produce (EF-ish: AddAsync).
 await ctx.Orders.AddAsync(new Order { Id = 1 });
 
+// Optional: produce with Kafka headers.
+await ctx.Orders.AddAsync(new Order { Id = 2 }, new Dictionary<string, string> { ["traceId"] = "abc" });
+
 // Consume (EF-ish: ForEachAsync).
 await ctx.Orders.ForEachAsync(o =>
 {
