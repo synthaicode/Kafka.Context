@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
+using System.Net.Http.Json;
 
 namespace Kafka.Context.PhysicalTests;
 
@@ -58,7 +59,11 @@ public sealed class JavaInteropProducerTests
             }, cts.Token);
 
             var schemaJson = NormalizeJsonForArgument(BuildSchemaJson());
-            await RunJavaProducerAsync(topic, schemaJson);
+            await RunJavaProducerAsync(topic, schemaJson, autoRegisterSchemas: true);
+
+            var subject = $"{topic}-value"; // TopicNameStrategy
+            var latest = await GetSchemaRegistryLatestAsync(subject);
+            Console.WriteLine($"[SR] subject={subject} latestVersion={latest.Version} id={latest.Id}");
 
             var completed = await Task.WhenAny(got.Task, Task.Delay(TimeSpan.FromSeconds(50), CancellationToken.None));
             Assert.Equal(got.Task, completed);
@@ -86,13 +91,24 @@ public sealed class JavaInteropProducerTests
         });
     }
 
+    private static async Task<SchemaRegistryLatest> GetSchemaRegistryLatestAsync(string subject)
+    {
+        using var http = new HttpClient { BaseAddress = new Uri(SchemaRegistryUrl) };
+        var resp = await http.GetAsync($"/subjects/{Uri.EscapeDataString(subject)}/versions/latest").ConfigureAwait(false);
+        resp.EnsureSuccessStatusCode();
+        var body = await resp.Content.ReadFromJsonAsync<SchemaRegistryLatest>().ConfigureAwait(false);
+        return body ?? throw new InvalidOperationException("Schema Registry latest response missing.");
+    }
+
+    private sealed record SchemaRegistryLatest(string Subject, int Version, int Id, string Schema);
+
     private static string BuildSchemaJson()
         => "{\"type\":\"record\",\"name\":\"JavaInteropAllTypes\",\"fields\":[{\"name\":\"BoolValue\",\"type\":\"boolean\"},{\"name\":\"IntValue\",\"type\":\"int\"},{\"name\":\"LongValue\",\"type\":\"long\"},{\"name\":\"TextValue\",\"type\":\"string\"},{\"name\":\"TimestampValue\",\"type\":{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"}},{\"name\":\"Amount\",\"type\":{\"type\":\"bytes\",\"logicalType\":\"decimal\",\"precision\":9,\"scale\":2}},{\"name\":\"Labels\",\"type\":{\"type\":\"map\",\"values\":\"string\"}}]}";
 
     private static string NormalizeJsonForArgument(string json)
         => json.Replace("\r", string.Empty).Replace("\n", string.Empty).Trim();
 
-    private static async Task RunJavaProducerAsync(string topic, string schemaJson)
+    private static async Task RunJavaProducerAsync(string topic, string schemaJson, bool autoRegisterSchemas)
     {
         var javaSource = $@"
 import java.util.*;
@@ -117,9 +133,12 @@ public final class KafkaContextInteropProducer {{
     props.put(""bootstrap.servers"", ""{KafkaContainerBootstrapServers}"");
     props.put(""acks"", ""all"");
     props.put(""enable.idempotence"", ""true"");
+    props.put(""auto.register.schemas"", ""{autoRegisterSchemas.ToString().ToLowerInvariant()}"");
     props.put(""key.serializer"", ""org.apache.kafka.common.serialization.StringSerializer"");
     props.put(""value.serializer"", ""io.confluent.kafka.serializers.KafkaAvroSerializer"");
     props.put(""schema.registry.url"", ""{SchemaRegistryContainerUrl}"");
+    props.put(""key.subject.name.strategy"", ""io.confluent.kafka.serializers.subject.TopicNameStrategy"");
+    props.put(""value.subject.name.strategy"", ""io.confluent.kafka.serializers.subject.TopicNameStrategy"");
 
     KafkaProducer<String, Object> producer = new KafkaProducer<>(props);
     Schema schema = new Schema.Parser().parse(schemaJson);
@@ -140,6 +159,10 @@ public final class KafkaContextInteropProducer {{
     Map<String, String> labels = new HashMap<>();
     labels.put(""a"", ""b"");
     record.put(""Labels"", labels);
+
+    if (schema.getField(""NewField"") != null) {{
+      record.put(""NewField"", ""v2"");
+    }}
 
     producer.send(new ProducerRecord<>(topic, ""k1"", record)).get();
     producer.flush();

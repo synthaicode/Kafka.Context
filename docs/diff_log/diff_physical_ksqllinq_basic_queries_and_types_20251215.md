@@ -12,11 +12,10 @@
     - nullable variants for each of the above.
   - Consumes with `DynamicTopicSet` and asserts values/types.
 - `tests/physical/Kafka.Context.PhysicalTests/AssemblyInfo.cs`
-  - Disable xUnit parallelization for physical tests to avoid cross-test interference with shared external resources (ksqlDB/Kafka/SR).
+  - Disable xUnit parallelization **within the physical test project only** to avoid cross-test interference with shared external resources (ksqlDB/Kafka/SR).
 
 ## Bug fixes discovered by the test
 - Fix timestamp serialization for Avro logical type `timestamp-millis`:
   - Producer now writes `DateTime` (UTC) as the logical value (instead of raw `long`), matching Apache Avro expectations.
   - Mapper accepts both `DateTime` and `long` for `DateTime` properties for compatibility.
 - Extend map handling to accept `object[]` representations observed from ksqlDB Avro payloads.
-
