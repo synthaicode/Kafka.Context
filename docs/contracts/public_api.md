@@ -29,6 +29,25 @@ Note: MVP の manual commit は **record 単位のみ**。`Commit(meta)` は `Fo
 
 Note: `ForEachAsync` の POCO マッピングは「受信した Avro record の field 名/型が POCO と一致する」ことを前提とする。外部システムが作った schema を POCO に寄せる mapping 層は Non-Goals。
 
+## DynamicTopicSet (SR-driven consume)
+
+### Create by topic name
+- `DynamicTopicSet Topic(string topic)`
+
+### Consume with key/value
+- `Task ForEachAsync(Func<object?, GenericRecord, Dictionary<string, string>, MessageMeta, Task> action)`
+- `Task ForEachAsync(Func<object?, GenericRecord, Dictionary<string, string>, MessageMeta, Task> action, bool autoCommit)`
+- `Task ForEachAsync(Func<object?, GenericRecord, Dictionary<string, string>, MessageMeta, Task> action, bool autoCommit, CancellationToken cancellationToken)`
+- `Task ForEachAsync(Func<object?, GenericRecord, Dictionary<string, string>, MessageMeta, Task> action, CancellationToken cancellationToken)`
+- `Task ForEachAsync(Func<object?, GenericRecord, Dictionary<string, string>, MessageMeta, Task> action, TimeSpan timeout)`
+
+### Manual commit (when `autoCommit=false`)
+- `void Commit(MessageMeta meta)`
+
+### Key contract (when consuming external systems)
+- If the key is Confluent Avro payload, `key` is `GenericRecord` (e.g., window boundaries for tumbling/hopping results).
+- Otherwise, `key` is `byte[]` (SR-unregistered primitive/unknown encoding).
+
 ## KafkaContext constructors（MVP）
 - `KafkaContext(KafkaContextOptions options)`
 - `KafkaContext(KafkaContextOptions options, ILoggerFactory? loggerFactory)`
