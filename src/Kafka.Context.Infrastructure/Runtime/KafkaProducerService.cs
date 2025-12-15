@@ -226,7 +226,7 @@ internal static class KafkaProducerService
         if (value is DateTime dt)
         {
             var utc = dt.Kind == DateTimeKind.Utc ? dt : dt.ToUniversalTime();
-            return new DateTimeOffset(utc).ToUnixTimeMilliseconds();
+            return utc;
         }
 
         if (value is decimal dec)
