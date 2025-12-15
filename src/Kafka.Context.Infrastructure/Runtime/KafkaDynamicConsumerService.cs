@@ -120,7 +120,16 @@ internal static class KafkaDynamicConsumerService
             return keyBytes;
 
         var ctx = new SerializationContext(MessageComponentType.Key, topic);
-        return await avro.DeserializeAsync(keyBytes, isNull: false, ctx).ConfigureAwait(false);
+        try
+        {
+            return await avro.DeserializeAsync(keyBytes, isNull: false, ctx).ConfigureAwait(false);
+        }
+        catch
+        {
+            if (TryDecodeWindowedKey(avro, topic, keyBytes, out var windowed))
+                return windowed;
+            throw;
+        }
     }
 
     private static async Task<GenericRecord> DecodeValueAsync(AvroDeserializer<GenericRecord> avro, string topic, byte[] valueBytes)
@@ -139,5 +148,64 @@ internal static class KafkaDynamicConsumerService
 
         var schemaId = BinaryPrimitives.ReadInt32BigEndian(bytes.AsSpan(1, 4));
         return schemaId > 0;
+    }
+
+    private static bool TryDecodeWindowedKey(AvroDeserializer<GenericRecord> avro, string topic, byte[] bytes, out WindowedKey windowedKey)
+    {
+        windowedKey = null!;
+
+        var ctx = new SerializationContext(MessageComponentType.Key, topic);
+
+        foreach (var suffixLen in new[] { 12, 16, 8 })
+        {
+            if (bytes.Length <= 5 + suffixLen)
+                continue;
+
+            var trimmed = bytes.AsSpan(0, bytes.Length - suffixLen).ToArray();
+            if (!LooksLikeConfluentAvroPayload(trimmed))
+                continue;
+
+            try
+            {
+                var record = avro.DeserializeAsync(trimmed, isNull: false, ctx).GetAwaiter().GetResult();
+                var suffix = bytes.AsSpan(bytes.Length - suffixLen, suffixLen);
+
+                long start;
+                long? end;
+                int? seq;
+
+                switch (suffixLen)
+                {
+                    case 12:
+                        start = BinaryPrimitives.ReadInt64BigEndian(suffix.Slice(0, 8));
+                        end = null;
+                        seq = BinaryPrimitives.ReadInt32BigEndian(suffix.Slice(8, 4));
+                        break;
+                    case 16:
+                        start = BinaryPrimitives.ReadInt64BigEndian(suffix.Slice(0, 8));
+                        end = BinaryPrimitives.ReadInt64BigEndian(suffix.Slice(8, 8));
+                        seq = null;
+                        break;
+                    case 8:
+                        start = BinaryPrimitives.ReadInt64BigEndian(suffix);
+                        end = null;
+                        seq = null;
+                        break;
+                    default:
+                        start = 0;
+                        end = null;
+                        seq = null;
+                        break;
+                }
+
+                windowedKey = new WindowedKey(record, start, end, seq);
+                return true;
+            }
+            catch
+            {
+            }
+        }
+
+        return false;
     }
 }

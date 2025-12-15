@@ -48,6 +48,8 @@ Note: `ForEachAsync` の POCO マッピングは「受信した Avro record の 
 - If the key is Confluent Avro payload, `key` is `GenericRecord` (e.g., window boundaries for tumbling/hopping results).
 - Otherwise, `key` is `byte[]` (SR-unregistered primitive/unknown encoding).
 
+Note: ksqlDB windowed keys may append window bytes after the Confluent Avro payload. In that case `key` is `WindowedKey` (contains the decoded Avro `Key` plus extracted window boundary info).
+
 ## KafkaContext constructors（MVP）
 - `KafkaContext(KafkaContextOptions options)`
 - `KafkaContext(KafkaContextOptions options, ILoggerFactory? loggerFactory)`

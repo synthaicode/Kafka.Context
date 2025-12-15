@@ -55,4 +55,9 @@ override Kafka.Context.Messaging.MessageMeta.GetHashCode() -> int
 override Kafka.Context.Messaging.MessageMeta.ToString() -> string!
 static Kafka.Context.Messaging.MessageMeta.operator !=(Kafka.Context.Messaging.MessageMeta? left, Kafka.Context.Messaging.MessageMeta? right) -> bool
 static Kafka.Context.Messaging.MessageMeta.operator ==(Kafka.Context.Messaging.MessageMeta? left, Kafka.Context.Messaging.MessageMeta? right) -> bool
-
+Kafka.Context.Messaging.WindowedKey
+Kafka.Context.Messaging.WindowedKey.Key.get -> Avro.Generic.GenericRecord!
+Kafka.Context.Messaging.WindowedKey.Sequence.get -> int?
+Kafka.Context.Messaging.WindowedKey.WindowedKey(Avro.Generic.GenericRecord! key, long windowStartUnixMs, long? windowEndUnixMs, int? sequence) -> void
+Kafka.Context.Messaging.WindowedKey.WindowEndUnixMs.get -> long?
+Kafka.Context.Messaging.WindowedKey.WindowStartUnixMs.get -> long
