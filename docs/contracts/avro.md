@@ -24,3 +24,8 @@ Kafka + Schema Registry の「契約（schema）」を Avro で統一し、起�
 - Kafka.Context は互換性レベル（BACKWARD/FULL など）を設定しない。
 - 互換性レベルは SR 側（クラスタ既定値 / subject 設定）に従う。
 - 非互換の場合は登録時に SR が拒否し、Kafka.Context は Provisioning 失敗として起動しない。
+
+## Consume contract（決定）
+- `ForEachAsync` は「受信した Avro record の field 名/型が、利用者の POCO と一致する」ことを前提に POCO へマッピングする。
+- Flink 等の外部システムが SR に登録した schema を読む場合も、**同じ contract（subject/schema）** を共有している前提で運用する。
+- 外部 schema を POCO に変換するための mapping/alias 層は、この OSS のスコープ外（Non-Goals）。

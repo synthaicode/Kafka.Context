@@ -8,6 +8,10 @@
 - 設定が許可し、ガード（rate limit 等）を通る場合のみ DLQ に送る。
 - DLQ 送信の有無に関わらず、対象レコードは commit して前進する。
 
+## 前提（Scope）
+- `ForEachAsync` は Avro record → POCO の “同名/同型” マッピングを前提とする。
+- 外部システムの schema を POCO に変換する mapping/alias 層は Non-Goals（このドキュメントの「mapping failure」には、そのような不一致も含まれる）。
+
 ## 擬似コード（移植元の形）
 ```csharp
 internal static async Task HandleMappingException<TKey, TValue>(
@@ -35,4 +39,3 @@ internal static async Task HandleMappingException<TKey, TValue>(
 ## 関連
 - DLQ envelope: `docs/contracts/dlq.md`
 - Retry/commit: `docs/contracts/retry.md`
-

@@ -15,6 +15,7 @@ Source: https://github.com/synthaicode/Kafka.Context
 - No stream processing engine (Kafka Streams / Flink)
 - No query generation or DSL (no JOIN / Window / Aggregation)
 - No general-purpose Kafka client wrapper (this stays intentionally small)
+- No “external Schema Registry schema → POCO” mapping layer (consume assumes the Avro contract matches your POCO)
 
 ## Docs
 - Repository map: `overview.md`

@@ -19,6 +19,7 @@ Single-column key is treated as Kafka primitive and is not registered to SR. Onl
 - No ksqlDB query generation / DSL
 - No general-purpose Kafka client wrapper (this package stays opinionated and small)
 - No automatic schema evolution/migration tooling beyond (register/verify) during provisioning
+- No “external Schema Registry schema → POCO” mapping layer (consume assumes the Avro contract matches your POCO)
 
 ## Install
 

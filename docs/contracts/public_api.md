@@ -20,6 +20,8 @@
 
 Note: MVP の manual commit は **record 単位のみ**。`Commit(entity)` は `ForEachAsync(..., autoCommit:false)` のハンドラ内で呼ぶ。
 
+Note: `ForEachAsync` の POCO マッピングは「受信した Avro record の field 名/型が POCO と一致する」ことを前提とする。外部システムが作った schema を POCO に寄せる mapping 層は Non-Goals。
+
 ## KafkaContext constructors（MVP）
 - `KafkaContext(KafkaContextOptions options)`
 - `KafkaContext(KafkaContextOptions options, ILoggerFactory? loggerFactory)`
