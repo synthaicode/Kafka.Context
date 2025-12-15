@@ -145,6 +145,46 @@ public sealed class EventSet<T>
             CancellationToken.None);
     }
 
+    public Task ForEachAsync(Func<T, Dictionary<string, string>, MessageMeta, Task> action, bool autoCommit, CancellationToken cancellationToken)
+    {
+        if (action is null) throw new ArgumentNullException(nameof(action));
+
+        return Kafka.Context.Infrastructure.Runtime.KafkaConsumerService.ForEachAsync<T>(
+            _context.Options,
+            _context.LoggerFactory,
+            GetTopicName(),
+            async (entity, headers, meta) =>
+            {
+                _context.Logger?.LogInformation(
+                    "EventSet consumed {EntityType} from {Topic} offset {Offset} timestamp {Timestamp}",
+                    typeof(T).Name,
+                    GetTopicName(),
+                    meta.Offset,
+                    meta.TimestampUtc);
+
+                KafkaContextMetrics.Consumed(typeof(T).Name, GetTopicName(), autoCommit);
+                try
+                {
+                    await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit, (e) => action(e, headers, meta)).ConfigureAwait(false);
+                }
+                finally
+                {
+                    if (!autoCommit && _manualCommit.Remove(entity!))
+                    {
+                        _context.Logger?.LogWarning(
+                            "Manual commit was not called for {EntityType} on {Topic} offset {Offset}",
+                            typeof(T).Name,
+                            GetTopicName(),
+                            meta.Offset);
+                    }
+                }
+            },
+            autoCommit,
+            registerCommit: RegisterManualCommit,
+            onMappingError: HandleMappingErrorAsync,
+            cancellationToken);
+    }
+
     public Task ForEachAsync(Func<T, Dictionary<string, string>, MessageMeta, Task> action, TimeSpan timeout)
     {
         using var cts = new CancellationTokenSource(timeout);

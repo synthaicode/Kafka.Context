@@ -13,6 +13,7 @@
 ### Handler with headers/meta
 - `Task ForEachAsync(Func<T, Dictionary<string, string>, MessageMeta, Task> action)`
 - `Task ForEachAsync(Func<T, Dictionary<string, string>, MessageMeta, Task> action, bool autoCommit)`
+- `Task ForEachAsync(Func<T, Dictionary<string, string>, MessageMeta, Task> action, bool autoCommit, CancellationToken cancellationToken)`
 - `Task ForEachAsync(Func<T, Dictionary<string, string>, MessageMeta, Task> action, TimeSpan timeout)`
 
 ### Manual commit (when `autoCommit=false`)

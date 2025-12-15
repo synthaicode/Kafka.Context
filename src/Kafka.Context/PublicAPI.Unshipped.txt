@@ -1,3 +1,4 @@
 #nullable enable
 Kafka.Context.EventSet<T>.AddAsync(T entity, System.Collections.Generic.Dictionary<string!, string!>! headers) -> System.Threading.Tasks.Task!
 Kafka.Context.EventSet<T>.AddAsync(T entity, System.Collections.Generic.Dictionary<string!, string!>! headers, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Kafka.Context.EventSet<T>.ForEachAsync(System.Func<T, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action, bool autoCommit, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!

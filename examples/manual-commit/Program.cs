@@ -28,9 +28,15 @@ internal static class Program
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true).Build();
         await using var context = new ManualCommitContext(configuration, LoggerFactory.Create(b => b.AddConsole()));
 
+        await context.Orders.AddAsync(new ManualCommitOrder { OrderId = 1, Amount = 10m }, new Dictionary<string, string>
+        {
+            ["traceId"] = Guid.NewGuid().ToString("N"),
+            ["source"] = "manual-commit",
+        });
+
         await context.Orders.ForEachAsync((order, headers, meta) =>
         {
-            Console.WriteLine($"Processing order {order.OrderId}: {order.Amount}");
+            Console.WriteLine($"Processing order {order.OrderId}: {order.Amount} (traceId={headers.GetValueOrDefault("traceId", "-")})");
             context.Orders.Commit(order);
             return Task.CompletedTask;
         }, autoCommit: false);

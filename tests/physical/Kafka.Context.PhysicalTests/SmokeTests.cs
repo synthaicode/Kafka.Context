@@ -37,18 +37,22 @@ public sealed class SmokeTests
             using var provisionCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
             await ctx.ProvisionAsync(provisionCts.Token);
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
             var gotOrder = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var orderConsumeTask = ctx.Orders.ForEachAsync(o =>
+            using var orderCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var orderConsumeTask = ctx.Orders.ForEachAsync((o, headers, _) =>
             {
+                Assert.True(headers.TryGetValue("traceId", out var traceId));
+                Assert.Equal("t-1", traceId);
                 gotOrder.TrySetResult(true);
-                cts.Cancel();
+                orderCts.Cancel();
                 return Task.CompletedTask;
-            }, cts.Token);
+            }, autoCommit: true, orderCts.Token);
 
             await Task.Delay(TimeSpan.FromSeconds(2), CancellationToken.None);
-            await ctx.Orders.AddAsync(new PhysicalOrder { Id = 1, Amount = 10.5m }, cts.Token);
+            await ctx.Orders.AddAsync(
+                new PhysicalOrder { Id = 1, Amount = 10.5m },
+                new Dictionary<string, string> { ["traceId"] = "t-1" },
+                CancellationToken.None);
 
             await Task.WhenAny(gotOrder.Task, Task.Delay(TimeSpan.FromSeconds(20), CancellationToken.None));
             Assert.True(gotOrder.Task.IsCompletedSuccessfully);
@@ -73,7 +77,10 @@ public sealed class SmokeTests
                 .ForEachAsync(_ => throw new InvalidOperationException("boom"), cts2.Token);
 
             await Task.Delay(TimeSpan.FromSeconds(2), CancellationToken.None);
-            await ctx.Orders.AddAsync(new PhysicalOrder { Id = 2, Amount = -1m }, cts2.Token);
+            await ctx.Orders.AddAsync(
+                new PhysicalOrder { Id = 2, Amount = -1m },
+                new Dictionary<string, string> { ["traceId"] = "t-2" },
+                cts2.Token);
 
             await Task.WhenAny(gotDlq.Task, Task.Delay(TimeSpan.FromSeconds(20), CancellationToken.None));
             Assert.True(gotDlq.Task.IsCompletedSuccessfully);
@@ -82,8 +89,116 @@ public sealed class SmokeTests
             Assert.Equal(topic, envelope.Topic);
             Assert.False(string.IsNullOrWhiteSpace(envelope.ErrorType));
             Assert.False(string.IsNullOrWhiteSpace(envelope.ErrorFingerprint));
+            Assert.True(envelope.Headers.TryGetValue("traceId", out var dlqTraceId));
+            Assert.Equal("t-2", dlqTraceId);
 
-            await Task.WhenAll(dlqConsumeTask, failingConsumeTask);
+            try
+            {
+                await Task.WhenAll(dlqConsumeTask, failingConsumeTask).WaitAsync(TimeSpan.FromSeconds(40));
+            }
+            finally
+            {
+                cts2.Cancel();
+            }
+        });
+    }
+
+    [Fact]
+    public async Task ManualCommit_Restart_ResumesFromCommittedOffset()
+    {
+        if (!IsEnabled())
+            return;
+
+        await RunWithRetryAsync(async () =>
+        {
+            var baseClientId = $"physical-mc-{Guid.NewGuid():N}";
+            var groupId = $"physical-mc-group-{Guid.NewGuid():N}";
+
+            IConfiguration BuildConfig(string clientId) =>
+                new ConfigurationBuilder()
+                    .AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["KsqlDsl:Common:BootstrapServers"] = "127.0.0.1:39092",
+                        ["KsqlDsl:Common:ClientId"] = clientId,
+                        ["KsqlDsl:SchemaRegistry:Url"] = "http://127.0.0.1:18081",
+                        ["KsqlDsl:DlqTopicName"] = $"dead_letter_queue_{clientId}",
+                        ["KsqlDsl:Topics:physical_manual_commit_orders:Consumer:GroupId"] = groupId,
+                        ["KsqlDsl:Topics:physical_manual_commit_orders:Consumer:AutoOffsetReset"] = "Earliest",
+                    })
+                    .Build();
+
+            // First run: consume 1 record and commit it.
+            await using (var ctx1 = new PhysicalManualCommitContext(BuildConfig($"{baseClientId}-1"), LoggerFactory.Create(b => b.AddConsole())))
+            {
+                using var provisionCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                await ctx1.ProvisionAsync(provisionCts.Token);
+
+                await ctx1.ManualOrders.AddAsync(
+                    new ManualCommitOrder { OrderId = 1, Amount = 10m },
+                    new Dictionary<string, string> { ["traceId"] = "mc-1" },
+                    CancellationToken.None);
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                var gotFirst = new TaskCompletionSource<MessageMeta>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                var t1 = ctx1.ManualOrders.ForEachAsync((order, headers, meta) =>
+                {
+                    if (order.OrderId == 1)
+                    {
+                        Assert.Equal("mc-1", headers.GetValueOrDefault("traceId"));
+                        ctx1.ManualOrders.Commit(order);
+                        gotFirst.TrySetResult(meta);
+                        cts.Cancel();
+                    }
+
+                    return Task.CompletedTask;
+                }, autoCommit: false, cts.Token);
+
+                var completed = await Task.WhenAny(gotFirst.Task, Task.Delay(TimeSpan.FromSeconds(20), CancellationToken.None));
+                Assert.Equal(gotFirst.Task, completed);
+                await t1;
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
+
+            // Second run: ensure we don't re-consume the committed record.
+            await using (var ctx2 = new PhysicalManualCommitContext(BuildConfig($"{baseClientId}-2"), LoggerFactory.Create(b => b.AddConsole())))
+            {
+                using var provisionCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                await ctx2.ProvisionAsync(provisionCts.Token);
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                var gotSecond = new TaskCompletionSource<MessageMeta>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                var seenIds = new List<int>();
+                var t2 = ctx2.ManualOrders.ForEachAsync((order, headers, meta) =>
+                {
+                    seenIds.Add(order.OrderId);
+
+                    if (order.OrderId == 1)
+                        throw new InvalidOperationException("Re-consumed committed record (OrderId=1).");
+
+                    if (order.OrderId == 2)
+                    {
+                        Assert.Equal("mc-2", headers.GetValueOrDefault("traceId"));
+                        ctx2.ManualOrders.Commit(order);
+                        gotSecond.TrySetResult(meta);
+                        cts.Cancel();
+                    }
+
+                    return Task.CompletedTask;
+                }, autoCommit: false, cts.Token);
+
+                await Task.Delay(TimeSpan.FromSeconds(2), CancellationToken.None);
+                await ctx2.ManualOrders.AddAsync(
+                    new ManualCommitOrder { OrderId = 2, Amount = 20m },
+                    new Dictionary<string, string> { ["traceId"] = "mc-2" },
+                    CancellationToken.None);
+
+                var completed = await Task.WhenAny(gotSecond.Task, Task.Delay(TimeSpan.FromSeconds(20), CancellationToken.None));
+                Assert.Equal(gotSecond.Task, completed);
+                await t2;
+            }
         });
     }
 
@@ -269,6 +384,27 @@ public sealed class SmokeTests
         protected override void OnModelCreating(IModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PhysicalOrder>();
+        }
+    }
+
+    [KafkaTopic("physical_manual_commit_orders")]
+    private sealed class ManualCommitOrder
+    {
+        public int OrderId { get; set; }
+        [KafkaDecimal(9, 2)]
+        public decimal Amount { get; set; }
+    }
+
+    private sealed class PhysicalManualCommitContext : KafkaContext
+    {
+        public PhysicalManualCommitContext(IConfiguration configuration, ILoggerFactory loggerFactory)
+            : base(configuration, loggerFactory) { }
+
+        public EventSet<ManualCommitOrder> ManualOrders { get; set; } = null!;
+
+        protected override void OnModelCreating(IModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ManualCommitOrder>();
         }
     }
 }

@@ -29,10 +29,16 @@ internal static class Program
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true).Build();
         await using var context = new OrderContext(configuration, LoggerFactory.Create(b => b.AddConsole()));
 
-        await context.Orders.AddAsync(new Order { Id = 1, Amount = 10m });
-        await context.Orders.ForEachAsync(o =>
+        await context.Orders.AddAsync(new Order { Id = 1, Amount = 10m }, new Dictionary<string, string>
         {
-            Console.WriteLine($"Processed order {o.Id}: {o.Amount}");
+            ["traceId"] = Guid.NewGuid().ToString("N"),
+            ["source"] = "quickstart",
+        });
+
+        await context.Orders.ForEachAsync((o, headers, meta) =>
+        {
+            Console.WriteLine($"Processed order {o.Id}: {o.Amount} (traceId={headers.GetValueOrDefault("traceId", "-")})");
+            Console.WriteLine($"Meta: {meta.Topic} {meta.Partition}:{meta.Offset} {meta.TimestampUtc}");
             return Task.CompletedTask;
         });
     }
