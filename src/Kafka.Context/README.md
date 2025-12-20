@@ -34,7 +34,7 @@ Example (fail-fast before deploy):
 kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject <topic>-value --type "<Namespace>.<TypeName>, <AssemblyName>"
 ```
 
-See `src/Kafka.Context.Cli/README.md` and `docs/schema-scaffold-requirements.md`.
+See https://www.nuget.org/packages/Kafka.Context.Cli and `docs/schema-scaffold-requirements.md`.
 
 ## Install
 

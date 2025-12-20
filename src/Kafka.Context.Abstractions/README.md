@@ -34,7 +34,7 @@ If you want SR (Schema Registry) fingerprint checks in CI/dev, use the dotnet to
 dotnet tool install -g Kafka.Context.Cli
 ```
 
-See `src/Kafka.Context.Cli/README.md`.
+See https://www.nuget.org/packages/Kafka.Context.Cli.
 
 ## Next steps
 - Main package README: https://github.com/synthaicode/Kafka.Context
