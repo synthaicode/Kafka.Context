@@ -122,6 +122,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_HEAP_OPTS: -Xms512m -Xmx2g
+      SCHEMA_REGISTRY_COMPATIBILITY_LEVEL: FULL
     healthcheck:
       test:
         - CMD

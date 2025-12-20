@@ -1,0 +1,106 @@
+# dotnet-kafka-context (CLI)
+
+A dotnet tool that fetches Avro schemas from Schema Registry and helps you generate/validate POCOs for Kafka.Context.
+
+## Install
+
+```powershell
+dotnet tool install -g dotnet-kafka-context
+```
+
+Update:
+
+```powershell
+dotnet tool update -g dotnet-kafka-context
+```
+
+## Commands
+
+### 1) `schema scaffold`
+
+Generate a C# type (record/class) from a Schema Registry subject.
+
+```powershell
+kafka-context schema scaffold --sr-url http://127.0.0.1:18081 --subject orders-value --output ./Generated
+```
+
+Options:
+- `--sr-url <url>`: Schema Registry URL (or env `KAFKA_CONTEXT_SCHEMA_REGISTRY_URL`)
+- `--subject <subject>`: Schema Registry subject (required)
+- `--output <dir>`: Output directory (default: `./`)
+- `--namespace <ns>`: Generated namespace (default: `Kafka.Context.Generated`)
+- `--style <record|class>`: Type style (default: `record`)
+- `--topic <topic>`: Force `[KafkaTopic]` value (default: derived from `*-value` / `*-key` subject names)
+- `--force`: Overwrite existing files
+- `--dry-run`: Print generated code to stdout (no file write)
+
+The generated type includes:
+- `[KafkaTopic("<topic>")]` (when derived/provided)
+- `[SchemaSubject("<subject>")]`
+- `[SchemaFingerprint("<fingerprint>")]`
+
+### 2) `schema verify` (recommended in CI)
+
+Validate that the latest Schema Registry schema fingerprint matches the fingerprint embedded in your type.
+
+```powershell
+kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject orders-value --type "Kafka.Context.Generated.Order, MyApp"
+```
+
+Options:
+- `--sr-url <url>`: Schema Registry URL (or env `KAFKA_CONTEXT_SCHEMA_REGISTRY_URL`)
+- `--subject <subject>`: Schema Registry subject (required)
+- `--type <assembly-qualified-type>`: Target type (optional)
+- `--fingerprint <hex>`: Expected fingerprint (optional)
+
+You must provide either `--type` or `--fingerprint`.
+
+Examples:
+
+```powershell
+# Verify using an embedded fingerprint attribute on your type
+kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject orders-value --type "Kafka.Context.Generated.Order, MyApp"
+
+# Verify without loading any assemblies (CI-friendly)
+kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject orders-value --fingerprint 0123abcd...
+```
+
+Exit codes:
+- `0`: OK (match)
+- `4`: Mismatch
+
+### 3) `schema subjects`
+
+List subjects from Schema Registry (useful to discover what to scaffold/verify).
+
+```powershell
+kafka-context schema subjects --sr-url http://127.0.0.1:18081
+```
+
+Filtering:
+
+```powershell
+kafka-context schema subjects --sr-url http://127.0.0.1:18081 --prefix orders-
+kafka-context schema subjects --sr-url http://127.0.0.1:18081 --contains -value
+```
+
+JSON output:
+
+```powershell
+kafka-context schema subjects --sr-url http://127.0.0.1:18081 --json
+```
+
+## What if a topic has multiple SR subjects?
+
+This CLI operates on **subjects**, not topics. If your environment has multiple subjects for a single topic, you must run `scaffold`/`verify` **per subject**.
+
+Typical Kafka.Context convention:
+- key: `<topic>-key`
+- value: `<topic>-value`
+
+In that case, run it twice if you need both. `--topic` only affects the generated `[KafkaTopic]` attribute; it does not select or discover subjects.
+
+## Notes / limitations
+
+- Fingerprint calculation is: normalized JSON (object keys sorted) + SHA-256, to keep `scaffold` and `verify` consistent.
+- Only schemas where the **root is an Avro `record`** are supported (no full coverage for advanced Avro features like references).

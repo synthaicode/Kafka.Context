@@ -3,5 +3,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+
+    <!-- Lockstep package version (overridden by CI -p:Version=...) -->
+    <VersionPrefix>1.1.0</VersionPrefix>
   </PropertyGroup>
 </Project>

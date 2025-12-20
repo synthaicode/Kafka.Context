@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "error-handling-dlq", "error
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErrorHandlingDlq", "examples\error-handling-dlq\ErrorHandlingDlq.csproj", "{E0BADA36-F6FE-4FCD-9E8A-5B06F53002D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kafka.Context.Cli", "src\Kafka.Context.Cli\Kafka.Context.Cli.csproj", "{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,18 @@ Global
 		{E0BADA36-F6FE-4FCD-9E8A-5B06F53002D2}.Release|x64.Build.0 = Release|Any CPU
 		{E0BADA36-F6FE-4FCD-9E8A-5B06F53002D2}.Release|x86.ActiveCfg = Release|Any CPU
 		{E0BADA36-F6FE-4FCD-9E8A-5B06F53002D2}.Release|x86.Build.0 = Release|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Debug|x64.Build.0 = Debug|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Debug|x86.Build.0 = Debug|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Release|x64.ActiveCfg = Release|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Release|x64.Build.0 = Release|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Release|x86.ActiveCfg = Release|Any CPU
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -171,5 +185,6 @@ Global
 		{851AE934-E750-45CA-8B71-FF41A962BAAD} = {5AE8F9DD-95BE-4A09-3398-CDD18ECDE778}
 		{5D31280E-3A77-5A32-C34B-0AE0B56BBCBF} = {B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}
 		{E0BADA36-F6FE-4FCD-9E8A-5B06F53002D2} = {5D31280E-3A77-5A32-C34B-0AE0B56BBCBF}
+		{37C04EA5-57D4-49A1-9692-2DF7D1ED2305} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
