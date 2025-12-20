@@ -10,6 +10,8 @@ Most users should install `Kafka.Context` and let it pull this package transitiv
   - `KafkaKeyAttribute`
   - `KafkaTimestampAttribute`
   - `KafkaDecimalAttribute`
+  - `SchemaSubjectAttribute` (Schema Registry subject metadata; used by CLI verify)
+  - `SchemaFingerprintAttribute` (schema fingerprint metadata; used by CLI verify)
 - Modeling abstractions used by `KafkaContext.OnModelCreating(...)` (e.g., `IModelBuilder`).
 
 ## Minimal example (attributes)
@@ -24,7 +26,16 @@ public sealed class Order
 }
 ```
 
+## Schema Scaffold / Verify (CLI, optional)
+
+If you want SR (Schema Registry) fingerprint checks in CI/dev, use the dotnet tool:
+
+```sh
+dotnet tool install -g Kafka.Context.Cli
+```
+
+See `src/Kafka.Context.Cli/README.md`.
+
 ## Next steps
 - Main package README: https://github.com/synthaicode/Kafka.Context
 - Configuration reference (`appsettings.json`): https://github.com/synthaicode/Kafka.Context/blob/main/docs/contracts/appsettings.en.md
-

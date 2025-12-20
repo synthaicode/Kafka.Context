@@ -6,4 +6,4 @@ This package is not intended to be referenced directly in typical applications; 
 
 ## Next steps
 - Main package README: https://github.com/synthaicode/Kafka.Context
-
+- Schema scaffold/verify CLI: `src/Kafka.Context.Cli/README.md`

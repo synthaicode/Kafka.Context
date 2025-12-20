@@ -14,4 +14,4 @@ https://github.com/synthaicode/Kafka.Context/blob/main/docs/contracts/appsetting
 
 ## Next steps
 - Main package README: https://github.com/synthaicode/Kafka.Context
-
+- Schema scaffold/verify CLI: `src/Kafka.Context.Cli/README.md`
