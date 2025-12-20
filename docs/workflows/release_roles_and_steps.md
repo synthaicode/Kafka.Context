@@ -81,7 +81,7 @@ Schema Registry と POCO の一致（fail-fast）を **CI/開発端末**で検�
 
 ```powershell
 # tool（RC/stable）の導入例
-dotnet tool install -g dotnet-kafka-context
+dotnet tool install -g Kafka.Context.Cli
 
 # 例: subject と型（assembly-qualified）を指定して検証
 kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject <topic>-value --type "<Namespace>.<TypeName>, <AssemblyName>"

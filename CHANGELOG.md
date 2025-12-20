@@ -11,7 +11,7 @@ This project follows Semantic Versioning (SemVer).
 ## 1.1.0 - 2025-12-20
 
 - Initial public release work-in-progress: provisioning (Kafka + Schema Registry), Avro contracts, DLQ + retry, physical smoke tests, per-topic consumer/producer config, and NuGet packaging docs.
-- Add `dotnet-kafka-context` (dotnet tool) for Schema Registry workflows:
+- Add `Kafka.Context.Cli` (dotnet tool) for Schema Registry workflows:
   - `schema subjects`: list/filter subjects
   - `schema scaffold`: generate POCO from SR subject (includes topic/subject/fingerprint attributes)
   - `schema verify`: fail-fast fingerprint check (CI-friendly; supports `--type` or `--fingerprint`)

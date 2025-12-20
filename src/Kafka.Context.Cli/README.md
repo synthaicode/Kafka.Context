@@ -1,17 +1,17 @@
-# dotnet-kafka-context (CLI)
+# Kafka.Context.Cli (CLI)
 
 A dotnet tool that fetches Avro schemas from Schema Registry and helps you generate/validate POCOs for Kafka.Context.
 
 ## Install
 
 ```powershell
-dotnet tool install -g dotnet-kafka-context
+dotnet tool install -g Kafka.Context.Cli
 ```
 
 Update:
 
 ```powershell
-dotnet tool update -g dotnet-kafka-context
+dotnet tool update -g Kafka.Context.Cli
 ```
 
 ## Commands
