@@ -107,7 +107,7 @@ internal static class KafkaConsumerService
         consumer.Close();
     }
 
-    private static void ApplyTopicConsumerConfig(KsqlDslOptions options, string topic, ConsumerConfig consumerConfig)
+    internal static void ApplyTopicConsumerConfig(KsqlDslOptions options, string topic, ConsumerConfig consumerConfig)
     {
         var section = ResolveTopicSection(options, topic);
         var consumer = section?.Consumer;
@@ -223,7 +223,7 @@ internal static class KafkaConsumerService
         return false;
     }
 
-    private static Dictionary<string, string> ExtractHeaders(Headers? headers)
+    internal static Dictionary<string, string> ExtractHeaders(Headers? headers)
     {
         var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (headers is null) return dict;

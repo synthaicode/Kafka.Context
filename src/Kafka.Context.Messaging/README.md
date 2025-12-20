@@ -29,4 +29,4 @@ await context.Dlq.ForEachAsync((env, headers, meta) =>
 
 ## Next steps
 - Main package README: https://github.com/synthaicode/Kafka.Context
-
+- Schema scaffold/verify CLI: https://www.nuget.org/packages/Kafka.Context.Cli

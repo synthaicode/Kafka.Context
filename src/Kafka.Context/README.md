@@ -21,6 +21,21 @@ Single-column key is treated as Kafka primitive and is not registered to SR. Onl
 - No automatic schema evolution/migration tooling beyond (register/verify) during provisioning
 - No “external Schema Registry schema → POCO” mapping layer (consume assumes the Avro contract matches your POCO)
 
+## Schema Scaffold / Verify (CLI, optional)
+
+Schema Registry fingerprint verification is intended to run in CI/dev via a separate dotnet tool:
+
+```sh
+dotnet tool install -g Kafka.Context.Cli
+```
+
+Example (fail-fast before deploy):
+```sh
+kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject <topic>-value --type "<Namespace>.<TypeName>, <AssemblyName>"
+```
+
+See https://www.nuget.org/packages/Kafka.Context.Cli and `docs/schema-scaffold-requirements.md`.
+
 ## Install
 
 ```sh

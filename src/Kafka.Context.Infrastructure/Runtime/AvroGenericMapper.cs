@@ -35,6 +35,12 @@ internal static class AvroGenericMapper
 
         if (targetType == typeof(DateTime))
         {
+            if (value is DateTime dt)
+                return dt.Kind == DateTimeKind.Utc ? dt : dt.ToUniversalTime();
+
+            if (value is DateTimeOffset dto)
+                return dto.UtcDateTime;
+
             var millis = Convert.ToInt64(value, CultureInfo.InvariantCulture);
             return DateTimeOffset.FromUnixTimeMilliseconds(millis).UtcDateTime;
         }
@@ -78,6 +84,50 @@ internal static class AvroGenericMapper
                 foreach (var kv in mapObj)
                     converted[kv.Key] = kv.Value?.ToString() ?? string.Empty;
                 return converted;
+            }
+
+            if (value is object[] array)
+            {
+                var converted = new Dictionary<string, string>(StringComparer.Ordinal);
+
+                if (array.Length == 2 && array[0] is string singleKey)
+                {
+                    converted[singleKey] = array[1]?.ToString() ?? string.Empty;
+                    return converted;
+                }
+
+                foreach (var item in array)
+                {
+                    if (item is null) continue;
+
+                    if (item is KeyValuePair<string, string> kvStr)
+                    {
+                        converted[kvStr.Key] = kvStr.Value;
+                        continue;
+                    }
+
+                    if (item is KeyValuePair<string, object?> kvObj)
+                    {
+                        converted[kvObj.Key] = kvObj.Value?.ToString() ?? string.Empty;
+                        continue;
+                    }
+
+                    if (item is GenericRecord record)
+                    {
+                        var keyField = record.Schema.Fields.FirstOrDefault(f => string.Equals(f.Name, "key", StringComparison.OrdinalIgnoreCase));
+                        var valueField = record.Schema.Fields.FirstOrDefault(f => string.Equals(f.Name, "value", StringComparison.OrdinalIgnoreCase));
+                        if (keyField is null || valueField is null)
+                            continue;
+
+                        var k = record[keyField.Name]?.ToString() ?? string.Empty;
+                        var v = record[valueField.Name]?.ToString() ?? string.Empty;
+                        converted[k] = v;
+                        continue;
+                    }
+                }
+
+                if (converted.Count > 0)
+                    return converted;
             }
 
             if (value is IDictionary map)

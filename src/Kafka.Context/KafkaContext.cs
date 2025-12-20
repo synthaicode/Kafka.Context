@@ -69,6 +69,11 @@ public abstract class KafkaContext : IAsyncDisposable
         return new EventSet<T>(this);
     }
 
+    public DynamicTopicSet Topic(string topic)
+    {
+        return new DynamicTopicSet(this, topic);
+    }
+
     public Task ProvisionAsync(CancellationToken cancellationToken = default)
     {
         return Kafka.Context.Provisioning.Provisioner.ProvisionAsync(this, cancellationToken);

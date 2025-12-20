@@ -1,1 +1,7 @@
 #nullable enable
+Kafka.Context.Attributes.SchemaFingerprintAttribute
+Kafka.Context.Attributes.SchemaFingerprintAttribute.Fingerprint.get -> string!
+Kafka.Context.Attributes.SchemaFingerprintAttribute.SchemaFingerprintAttribute(string! fingerprint) -> void
+Kafka.Context.Attributes.SchemaSubjectAttribute
+Kafka.Context.Attributes.SchemaSubjectAttribute.SchemaSubjectAttribute(string! subject) -> void
+Kafka.Context.Attributes.SchemaSubjectAttribute.Subject.get -> string!

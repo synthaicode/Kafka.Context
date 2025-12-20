@@ -24,6 +24,7 @@ Source: https://github.com/synthaicode/Kafka.Context
 - Target usage shape: `docs/samples/target_code_shape.md`
 - Release workflow: `docs/workflows/release_roles_and_steps.md`
 - NuGet README (the package page text): `src/Kafka.Context/README.md`
+- Schema scaffold/verify CLI (dotnet tool): https://www.nuget.org/packages/Kafka.Context.Cli
 
 ## Tests
 - Unit: `dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release`

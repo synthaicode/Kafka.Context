@@ -54,6 +54,7 @@ jobs:
           dotnet pack src/Kafka.Context.Messaging/Kafka.Context.Messaging.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context.Application/Kafka.Context.Application.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context.Infrastructure/Kafka.Context.Infrastructure.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
+          dotnet pack src/Kafka.Context.Cli/Kafka.Context.Cli.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context/Kafka.Context.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
 
       - name: Push to nuget.org

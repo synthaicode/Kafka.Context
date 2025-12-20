@@ -14,7 +14,7 @@ Kafka.Context のリリース手順は本ファイルを正とする。
 
 ```mermaid
 flowchart TD
-  A["Local prep<br/>release/<version><br/>build/test + docs/diff_log<br/>(dev/owners)"] --> B["Publish RC<br/>(GitHub Packages)"]
+  A["Local prep<br/>release/<version><br/>build/test + schema verify + docs/diff_log<br/>(dev/owners)"] --> B["Publish RC<br/>(GitHub Packages)"]
   B --> C["Download RC & verify<br/>(restore + examples + smoke + physical evidence)"]
   C --> D["GO decision<br/>(coordinator)"]
   D --> E["Lock commit hash<br/>(no commits after GO)"]
@@ -76,7 +76,18 @@ dotnet build Kafka.Context.sln -c Release -p:StrictPublicApi=true -warnaserror:R
 dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release
 ```
 
-### 4.2 Physical tests（対象変更時は必須）
+### 4.2 Schema verify（schema 変更/導入時は必須）
+Schema Registry と POCO の一致（fail-fast）を **CI/開発端末**で検証する。
+
+```powershell
+# tool（RC/stable）の導入例
+dotnet tool install -g Kafka.Context.Cli
+
+# 例: subject と型（assembly-qualified）を指定して検証
+kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject <topic>-value --type "<Namespace>.<TypeName>, <AssemblyName>"
+```
+
+### 4.3 Physical tests（対象変更時は必須）
 物理テストは Windows 前提で、docker-compose を起動して実行する。
 
 ```powershell

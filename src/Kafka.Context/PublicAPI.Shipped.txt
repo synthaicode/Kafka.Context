@@ -6,6 +6,16 @@ Kafka.Context.DlqSet.ForEachAsync(System.Func<Kafka.Context.Messaging.DlqEnvelop
 Kafka.Context.DlqSet.ForEachAsync(System.Func<Kafka.Context.Messaging.DlqEnvelope!, System.Threading.Tasks.Task!>! action, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 Kafka.Context.DlqSet.ForEachAsync(System.Func<Kafka.Context.Messaging.DlqEnvelope!, System.Threading.Tasks.Task!>! action, System.TimeSpan timeout) -> System.Threading.Tasks.Task!
 Kafka.Context.DlqSet.ForEachAsync(System.Func<Kafka.Context.Messaging.DlqEnvelope!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task!
+Kafka.Context.DynamicTopicSet
+Kafka.Context.DynamicTopicSet.Commit(Kafka.Context.Messaging.MessageMeta! meta) -> void
+Kafka.Context.DynamicTopicSet.ForEachAsync(System.Func<object?, Avro.Generic.GenericRecord!, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action, bool autoCommit, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Kafka.Context.DynamicTopicSet.ForEachAsync(System.Func<object?, Avro.Generic.GenericRecord!, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action, bool autoCommit) -> System.Threading.Tasks.Task!
+Kafka.Context.DynamicTopicSet.ForEachAsync(System.Func<object?, Avro.Generic.GenericRecord!, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Kafka.Context.DynamicTopicSet.ForEachAsync(System.Func<object?, Avro.Generic.GenericRecord!, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action, System.TimeSpan timeout) -> System.Threading.Tasks.Task!
+Kafka.Context.DynamicTopicSet.ForEachAsync(System.Func<object?, Avro.Generic.GenericRecord!, System.Collections.Generic.Dictionary<string!, string!>!, Kafka.Context.Messaging.MessageMeta!, System.Threading.Tasks.Task!>! action) -> System.Threading.Tasks.Task!
+Kafka.Context.DynamicTopicSet.OnError(Kafka.Context.ErrorAction action) -> Kafka.Context.DynamicTopicSet!
+Kafka.Context.DynamicTopicSet.WithRetry(int maxRetries, System.TimeSpan retryInterval) -> Kafka.Context.DynamicTopicSet!
+Kafka.Context.DynamicTopicSet.WithRetry(int maxRetries) -> Kafka.Context.DynamicTopicSet!
 Kafka.Context.ErrorAction
 Kafka.Context.ErrorAction.DLQ = 2 -> Kafka.Context.ErrorAction
 Kafka.Context.ErrorAction.Retry = 1 -> Kafka.Context.ErrorAction
@@ -39,6 +49,7 @@ Kafka.Context.KafkaContext.PreviewSchemaRegistryAvro() -> System.Collections.Gen
 Kafka.Context.KafkaContext.ProvisionAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Kafka.Context.KafkaContext.SectionName.get -> string!
 Kafka.Context.KafkaContext.Set<T>() -> Kafka.Context.EventSet<T>!
+Kafka.Context.KafkaContext.Topic(string! topic) -> Kafka.Context.DynamicTopicSet!
 Kafka.Context.SchemaRegistryAvroPlan
 Kafka.Context.SchemaRegistryAvroPlan.<Clone>$() -> Kafka.Context.SchemaRegistryAvroPlan!
 Kafka.Context.SchemaRegistryAvroPlan.Deconstruct(out string! TopicName, out string! EntityType, out int KeyPropertyCount, out string! KeySubject, out string? KeySchemaJson, out string! ValueSubject, out string! ValueSchemaJson, out string! ExpectedValueRecordFullName) -> void
