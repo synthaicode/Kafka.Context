@@ -1,6 +1,6 @@
 # src/
 
-NuGet パッケージのソースを置く。
+This directory contains the source for the NuGet packages in this repository.
 
 
 ## AI Assist
