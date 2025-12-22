@@ -55,6 +55,34 @@ Kafka.Context.Streaming.StreamingEventTimeConfig.Source.init -> void
 Kafka.Context.Streaming.StreamingEventTimeConfig.StreamingEventTimeConfig(string! ColumnName, Kafka.Context.Streaming.StreamingTimestampSource Source, System.TimeSpan WatermarkDelay) -> void
 Kafka.Context.Streaming.StreamingEventTimeConfig.WatermarkDelay.get -> System.TimeSpan
 Kafka.Context.Streaming.StreamingEventTimeConfig.WatermarkDelay.init -> void
+Kafka.Context.Streaming.StreamingGroupByClause
+Kafka.Context.Streaming.StreamingGroupByClause.<Clone>$() -> Kafka.Context.Streaming.StreamingGroupByClause!
+Kafka.Context.Streaming.StreamingGroupByClause.Deconstruct(out System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingGroupKey!>! Keys, out System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.ParameterExpression!>! Parameters) -> void
+Kafka.Context.Streaming.StreamingGroupByClause.Equals(Kafka.Context.Streaming.StreamingGroupByClause? other) -> bool
+Kafka.Context.Streaming.StreamingGroupByClause.Keys.get -> System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingGroupKey!>!
+Kafka.Context.Streaming.StreamingGroupByClause.Keys.init -> void
+Kafka.Context.Streaming.StreamingGroupByClause.Parameters.get -> System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.ParameterExpression!>!
+Kafka.Context.Streaming.StreamingGroupByClause.Parameters.init -> void
+Kafka.Context.Streaming.StreamingGroupByClause.StreamingGroupByClause(System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingGroupKey!>! Keys, System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.ParameterExpression!>! Parameters) -> void
+Kafka.Context.Streaming.StreamingGroupKey
+Kafka.Context.Streaming.StreamingGroupKey.<Clone>$() -> Kafka.Context.Streaming.StreamingGroupKey!
+Kafka.Context.Streaming.StreamingGroupKey.Alias.get -> string!
+Kafka.Context.Streaming.StreamingGroupKey.Alias.init -> void
+Kafka.Context.Streaming.StreamingGroupKey.Deconstruct(out System.Linq.Expressions.Expression! Expression, out string! Alias) -> void
+Kafka.Context.Streaming.StreamingGroupKey.Equals(Kafka.Context.Streaming.StreamingGroupKey? other) -> bool
+Kafka.Context.Streaming.StreamingGroupKey.Expression.get -> System.Linq.Expressions.Expression!
+Kafka.Context.Streaming.StreamingGroupKey.Expression.init -> void
+Kafka.Context.Streaming.StreamingGroupKey.StreamingGroupKey(System.Linq.Expressions.Expression! Expression, string! Alias) -> void
+Kafka.Context.Streaming.StreamingPredicate
+Kafka.Context.Streaming.StreamingPredicate.<Clone>$() -> Kafka.Context.Streaming.StreamingPredicate!
+Kafka.Context.Streaming.StreamingPredicate.Body.get -> System.Linq.Expressions.Expression!
+Kafka.Context.Streaming.StreamingPredicate.Body.init -> void
+Kafka.Context.Streaming.StreamingPredicate.Deconstruct(out System.Linq.Expressions.Expression! Body, out System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.ParameterExpression!>! Parameters) -> void
+Kafka.Context.Streaming.StreamingPredicate.Equals(Kafka.Context.Streaming.StreamingPredicate? other) -> bool
+Kafka.Context.Streaming.StreamingPredicate.Parameters.get -> System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.ParameterExpression!>!
+Kafka.Context.Streaming.StreamingPredicate.Parameters.init -> void
+Kafka.Context.Streaming.StreamingPredicate.StreamingPredicate(System.Linq.Expressions.Expression! Body, System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.ParameterExpression!>! Parameters) -> void
+static Kafka.Context.Streaming.StreamingPredicate.From(System.Linq.Expressions.LambdaExpression! predicate) -> Kafka.Context.Streaming.StreamingPredicate!
 Kafka.Context.Streaming.StreamingOutputMode
 Kafka.Context.Streaming.StreamingOutputMode.Changelog = 0 -> Kafka.Context.Streaming.StreamingOutputMode
 Kafka.Context.Streaming.StreamingOutputMode.Final = 1 -> Kafka.Context.Streaming.StreamingOutputMode
@@ -76,6 +104,8 @@ Kafka.Context.Streaming.StreamingQueryPlan.<Clone>$() -> Kafka.Context.Streaming
 Kafka.Context.Streaming.StreamingQueryPlan.Equals(Kafka.Context.Streaming.StreamingQueryPlan? other) -> bool
 Kafka.Context.Streaming.StreamingQueryPlan.GroupByKeySelector.get -> System.Linq.Expressions.LambdaExpression?
 Kafka.Context.Streaming.StreamingQueryPlan.GroupByKeySelector.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.GroupByClause.get -> Kafka.Context.Streaming.StreamingGroupByClause?
+Kafka.Context.Streaming.StreamingQueryPlan.GroupByClause.init -> void
 Kafka.Context.Streaming.StreamingQueryPlan.HasAggregate.get -> bool
 Kafka.Context.Streaming.StreamingQueryPlan.HasAggregate.init -> void
 Kafka.Context.Streaming.StreamingQueryPlan.HasGroupBy.get -> bool
@@ -84,7 +114,7 @@ Kafka.Context.Streaming.StreamingQueryPlan.HasHaving.get -> bool
 Kafka.Context.Streaming.StreamingQueryPlan.HasHaving.init -> void
 Kafka.Context.Streaming.StreamingQueryPlan.HavingPredicate.get -> System.Linq.Expressions.LambdaExpression?
 Kafka.Context.Streaming.StreamingQueryPlan.HavingPredicate.init -> void
-Kafka.Context.Streaming.StreamingQueryPlan.JoinPredicates.get -> System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.LambdaExpression!>!
+Kafka.Context.Streaming.StreamingQueryPlan.JoinPredicates.get -> System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingPredicate!>!
 Kafka.Context.Streaming.StreamingQueryPlan.JoinPredicates.init -> void
 Kafka.Context.Streaming.StreamingQueryPlan.SelectSelector.get -> System.Linq.Expressions.LambdaExpression?
 Kafka.Context.Streaming.StreamingQueryPlan.SelectSelector.init -> void
@@ -95,7 +125,7 @@ Kafka.Context.Streaming.StreamingQueryPlan.SourceTopics.init -> void
 Kafka.Context.Streaming.StreamingQueryPlan.SourceTypes.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
 Kafka.Context.Streaming.StreamingQueryPlan.SourceTypes.init -> void
 Kafka.Context.Streaming.StreamingQueryPlan.StreamingQueryPlan(System.Collections.Generic.IReadOnlyList<System.Type!>! sourceTypes, bool hasGroupBy, bool hasAggregate, bool hasHaving) -> void
-Kafka.Context.Streaming.StreamingQueryPlan.WherePredicates.get -> System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.LambdaExpression!>!
+Kafka.Context.Streaming.StreamingQueryPlan.WherePredicates.get -> System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingPredicate!>!
 Kafka.Context.Streaming.StreamingQueryPlan.WherePredicates.init -> void
 Kafka.Context.Streaming.StreamingQueryPlan.Window.get -> Kafka.Context.Streaming.StreamingWindowSpec?
 Kafka.Context.Streaming.StreamingQueryPlan.Window.init -> void
@@ -163,6 +193,15 @@ Kafka.Context.Streaming.StreamingWindowSpec.TimeColumnName.init -> void
 override Kafka.Context.Streaming.StreamingEventTimeConfig.Equals(object? obj) -> bool
 override Kafka.Context.Streaming.StreamingEventTimeConfig.GetHashCode() -> int
 override Kafka.Context.Streaming.StreamingEventTimeConfig.ToString() -> string!
+override Kafka.Context.Streaming.StreamingGroupByClause.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingGroupByClause.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingGroupByClause.ToString() -> string!
+override Kafka.Context.Streaming.StreamingGroupKey.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingGroupKey.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingGroupKey.ToString() -> string!
+override Kafka.Context.Streaming.StreamingPredicate.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingPredicate.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingPredicate.ToString() -> string!
 override Kafka.Context.Streaming.StreamingQueryDefinition.Equals(object? obj) -> bool
 override Kafka.Context.Streaming.StreamingQueryDefinition.GetHashCode() -> int
 override Kafka.Context.Streaming.StreamingQueryDefinition.ToString() -> string!
@@ -183,6 +222,12 @@ override Kafka.Context.Streaming.StreamingWindowSpec.GetHashCode() -> int
 override Kafka.Context.Streaming.StreamingWindowSpec.ToString() -> string!
 static Kafka.Context.Streaming.StreamingEventTimeConfig.operator !=(Kafka.Context.Streaming.StreamingEventTimeConfig? left, Kafka.Context.Streaming.StreamingEventTimeConfig? right) -> bool
 static Kafka.Context.Streaming.StreamingEventTimeConfig.operator ==(Kafka.Context.Streaming.StreamingEventTimeConfig? left, Kafka.Context.Streaming.StreamingEventTimeConfig? right) -> bool
+static Kafka.Context.Streaming.StreamingGroupByClause.operator !=(Kafka.Context.Streaming.StreamingGroupByClause? left, Kafka.Context.Streaming.StreamingGroupByClause? right) -> bool
+static Kafka.Context.Streaming.StreamingGroupByClause.operator ==(Kafka.Context.Streaming.StreamingGroupByClause? left, Kafka.Context.Streaming.StreamingGroupByClause? right) -> bool
+static Kafka.Context.Streaming.StreamingGroupKey.operator !=(Kafka.Context.Streaming.StreamingGroupKey? left, Kafka.Context.Streaming.StreamingGroupKey? right) -> bool
+static Kafka.Context.Streaming.StreamingGroupKey.operator ==(Kafka.Context.Streaming.StreamingGroupKey? left, Kafka.Context.Streaming.StreamingGroupKey? right) -> bool
+static Kafka.Context.Streaming.StreamingPredicate.operator !=(Kafka.Context.Streaming.StreamingPredicate? left, Kafka.Context.Streaming.StreamingPredicate? right) -> bool
+static Kafka.Context.Streaming.StreamingPredicate.operator ==(Kafka.Context.Streaming.StreamingPredicate? left, Kafka.Context.Streaming.StreamingPredicate? right) -> bool
 static Kafka.Context.Streaming.StreamingQueryDefinition.operator !=(Kafka.Context.Streaming.StreamingQueryDefinition? left, Kafka.Context.Streaming.StreamingQueryDefinition? right) -> bool
 static Kafka.Context.Streaming.StreamingQueryDefinition.operator ==(Kafka.Context.Streaming.StreamingQueryDefinition? left, Kafka.Context.Streaming.StreamingQueryDefinition? right) -> bool
 static Kafka.Context.Streaming.StreamingQueryPlan.operator !=(Kafka.Context.Streaming.StreamingQueryPlan? left, Kafka.Context.Streaming.StreamingQueryPlan? right) -> bool

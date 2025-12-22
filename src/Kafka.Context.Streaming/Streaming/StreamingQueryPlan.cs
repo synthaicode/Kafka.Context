@@ -29,11 +29,12 @@ public sealed record StreamingQueryPlan
 
     public StreamingSinkMode SinkMode { get; init; } = StreamingSinkMode.AppendOnly;
 
-    public IReadOnlyList<LambdaExpression> JoinPredicates { get; init; } = Array.Empty<LambdaExpression>();
-    public IReadOnlyList<LambdaExpression> WherePredicates { get; init; } = Array.Empty<LambdaExpression>();
+    public IReadOnlyList<StreamingPredicate> JoinPredicates { get; init; } = Array.Empty<StreamingPredicate>();
+    public IReadOnlyList<StreamingPredicate> WherePredicates { get; init; } = Array.Empty<StreamingPredicate>();
 
     public LambdaExpression? SelectSelector { get; init; }
     public LambdaExpression? GroupByKeySelector { get; init; }
+    public StreamingGroupByClause? GroupByClause { get; init; }
     public LambdaExpression? HavingPredicate { get; init; }
 
     public bool HasGroupBy { get; init; }

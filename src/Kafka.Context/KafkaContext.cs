@@ -324,7 +324,11 @@ public abstract class KafkaContext : IAsyncDisposable
         var visitor = new AggregateFunctionVisitor();
 
         if (plan.SelectSelector is not null) visitor.Visit(plan.SelectSelector.Body);
-        if (plan.GroupByKeySelector is not null) visitor.Visit(plan.GroupByKeySelector.Body);
+        if (plan.GroupByClause is not null)
+        {
+            foreach (var key in plan.GroupByClause.Keys)
+                visitor.Visit(key.Expression);
+        }
         if (plan.HavingPredicate is not null) visitor.Visit(plan.HavingPredicate.Body);
 
         foreach (var w in plan.WherePredicates)
@@ -390,10 +394,10 @@ public abstract class KafkaContext : IAsyncDisposable
         if (item.Kind != StreamingStatementKind.TableCtas)
             throw new InvalidOperationException("Window TVF requires CTAS (aggregation). Add GroupBy/Aggregate/Having.");
 
-        if (item.Plan.GroupByKeySelector is null)
+        if (item.Plan.GroupByClause is null)
             throw new InvalidOperationException("Window TVF requires GroupBy that includes window_start/window_end.");
 
-        var (hasStart, hasEnd) = FindFlinkWindowBoundaries(item.Plan.GroupByKeySelector);
+        var (hasStart, hasEnd) = FindFlinkWindowBoundaries(item.Plan.GroupByClause);
         if (!hasStart || !hasEnd)
             throw new InvalidOperationException("Window GroupBy must include both FlinkWindow.Start() and FlinkWindow.End().");
 
@@ -401,10 +405,11 @@ public abstract class KafkaContext : IAsyncDisposable
             throw new InvalidOperationException("Window TVF requires a time column name.");
     }
 
-    private static (bool HasStart, bool HasEnd) FindFlinkWindowBoundaries(System.Linq.Expressions.LambdaExpression selector)
+    private static (bool HasStart, bool HasEnd) FindFlinkWindowBoundaries(StreamingGroupByClause clause)
     {
         var visitor = new FlinkWindowBoundaryVisitor();
-        visitor.Visit(selector.Body);
+        foreach (var key in clause.Keys)
+            visitor.Visit(key.Expression);
         return (visitor.HasStart, visitor.HasEnd);
     }
 
@@ -427,10 +432,9 @@ public abstract class KafkaContext : IAsyncDisposable
         }
     }
 
-    private static bool IsKeyEqualityOnly(System.Linq.Expressions.LambdaExpression predicate)
+    private static bool IsKeyEqualityOnly(StreamingPredicate predicate)
     {
-        var body = predicate.Body;
-        return IsConjunctionOfEqualities(body, predicate.Parameters);
+        return IsConjunctionOfEqualities(predicate.Body, predicate.Parameters);
     }
 
     private static bool IsConjunctionOfEqualities(

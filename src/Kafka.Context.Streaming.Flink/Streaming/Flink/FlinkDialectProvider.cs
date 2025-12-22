@@ -60,7 +60,7 @@ public sealed class FlinkDialectProvider : IStreamingDialectProvider, IStreaming
         var renderer = new FlinkSqlRenderer();
         var query = renderer.RenderSelect(plan);
 
-        var target = renderer.QuoteIdentifier(NormalizeObjectName(objectName));
+        var target = FlinkSqlIdentifiers.QuoteIdentifier(NormalizeObjectName(objectName));
 
         var ddlBody = kind switch
         {
@@ -88,7 +88,7 @@ public sealed class FlinkDialectProvider : IStreamingDialectProvider, IStreaming
             if (!seen.Add(source.ObjectName))
                 continue;
 
-            var table = renderer.QuoteIdentifier(NormalizeObjectName(source.ObjectName));
+            var table = FlinkSqlIdentifiers.QuoteIdentifier(NormalizeObjectName(source.ObjectName));
             var columns = RenderColumns(source.EntityType, source.Config, isSink: false);
             var with = RenderKafkaWithClause(source.TopicName, isSink: false);
 
@@ -115,7 +115,7 @@ public sealed class FlinkDialectProvider : IStreamingDialectProvider, IStreaming
             if (!seen.Add(sink.ObjectName))
                 continue;
 
-            var table = renderer.QuoteIdentifier(NormalizeObjectName(sink.ObjectName));
+            var table = FlinkSqlIdentifiers.QuoteIdentifier(NormalizeObjectName(sink.ObjectName));
             var columns = RenderColumns(sink.EntityType, config: null, isSink: true, primaryKeys: sink.PrimaryKeyColumns);
             var with = RenderKafkaWithClause(sink.TopicName, isSink: true);
 

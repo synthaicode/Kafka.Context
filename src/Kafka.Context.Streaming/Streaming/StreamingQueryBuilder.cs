@@ -18,13 +18,16 @@ public sealed class StreamingQueryBuilder : IStreamingQueryBuilder
 internal sealed class StreamingQueryPlanBuilder
 {
     private readonly List<Type> _sourceTypes = new();
-    private readonly List<LambdaExpression> _joinPredicates = new();
-    private readonly List<LambdaExpression> _wherePredicates = new();
+    private readonly List<StreamingPredicate> _joinPredicates = new();
+    private readonly List<StreamingPredicate> _wherePredicates = new();
+    private readonly StreamingPredicateBuilder _predicateBuilder = new();
+    private readonly StreamingGroupByClauseBuilder _groupByBuilder = new();
 
     private LambdaExpression? _selectSelector;
     private LambdaExpression? _groupByKeySelector;
     private LambdaExpression? _havingPredicate;
     private StreamingWindowSpec? _window;
+    private StreamingGroupByClause? _groupByClause;
 
     public bool HasGroupBy { get; private set; }
     public bool HasAggregate { get; private set; }
@@ -43,13 +46,13 @@ internal sealed class StreamingQueryPlanBuilder
     public void AddJoin(LambdaExpression predicate)
     {
         if (predicate is null) throw new ArgumentNullException(nameof(predicate));
-        _joinPredicates.Add(predicate);
+        _joinPredicates.Add(_predicateBuilder.Build(predicate));
     }
 
     public void AddWhere(LambdaExpression predicate)
     {
         if (predicate is null) throw new ArgumentNullException(nameof(predicate));
-        _wherePredicates.Add(predicate);
+        _wherePredicates.Add(_predicateBuilder.Build(predicate));
     }
 
     public void SetSelect(LambdaExpression selector)
@@ -62,6 +65,7 @@ internal sealed class StreamingQueryPlanBuilder
     {
         if (keySelector is null) throw new ArgumentNullException(nameof(keySelector));
         _groupByKeySelector = keySelector;
+        _groupByClause = _groupByBuilder.Build(keySelector);
     }
 
     public void SetHaving(LambdaExpression predicate)
@@ -83,6 +87,7 @@ internal sealed class StreamingQueryPlanBuilder
             WherePredicates = _wherePredicates.ToArray(),
             SelectSelector = _selectSelector,
             GroupByKeySelector = _groupByKeySelector,
+            GroupByClause = _groupByClause,
             HavingPredicate = _havingPredicate,
             Window = _window,
         };
