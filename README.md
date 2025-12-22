@@ -26,6 +26,7 @@ Source: https://github.com/synthaicode/Kafka.Context
 - Release workflow: `docs/workflows/release_roles_and_steps.md`
 - NuGet README (the package page text): `src/Kafka.Context/README.md`
 - Streaming API notes (Flink): `docs/wiki/streaming-api.md`
+- Flink examples: `examples/streaming-flink/` and `examples/streaming-flink-flow/`
 - Schema scaffold/verify CLI (dotnet tool): https://www.nuget.org/packages/Kafka.Context.Cli
 
 ## Tests

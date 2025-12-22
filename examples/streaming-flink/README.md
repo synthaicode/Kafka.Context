@@ -1,12 +1,17 @@
 # streaming-flink
 
-Flink 方言向けの `ToQuery(...)` サンプル。
+Flink dialect `ToQuery(...)` samples.
 
-- select / where / groupby / having / join を個別に表示する（DDL は標準出力へ出す）。
+- Shows select / where / groupby / having / join separately (DDL is printed to stdout).
+
+## Flink query support
+
+- Window: TUMBLE / HOP / SESSION (`FlinkWindow` + `FlinkWindowExtensions`)
+- Aggregates: `FlinkAgg.Count/Sum/Avg`
+- Functions: `FlinkSql` string/JSON/datetime/array/map helpers (see `docs/wiki/streaming-api.md`)
 
 ## Run
 
 ```powershell
 dotnet run --project examples/streaming-flink/FlinkStreamingExamples.csproj
 ```
-

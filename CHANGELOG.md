@@ -6,6 +6,8 @@ This project follows Semantic Versioning (SemVer).
 
 ## Unreleased
 
+## 1.2.0 - 2025-12-22
+
 - [BREAKING] Remove entity access modes (readOnly/writeOnly): `IModelBuilder.Entity<T>` no longer accepts flags and `EventSet<T>` no longer enforces read/write constraints.
 - Streaming (spec): define query registry as context-instance scoped (no static global registry).
 - Streaming (Flink): window/join constraints, output/sink modes, and DDL generation for sources/sinks/queries.
