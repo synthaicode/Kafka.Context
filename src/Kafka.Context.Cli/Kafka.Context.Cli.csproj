@@ -22,6 +22,8 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\docs\AI_DEVELOPMENT_GUIDE.md" Pack="true" PackagePath="\" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\docs\ai_guide_conversation_rules.md" Pack="true" PackagePath="\" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

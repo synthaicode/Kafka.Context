@@ -132,6 +132,27 @@ Additional options:
 - `--assembly <path[,path]>`: Load assemblies to resolve POCOs by `[KafkaTopic]` name.
 - `--allow-missing-types`: Allow topics without matching POCOs (placeholder columns).
 
+### 5) `ai guide`
+
+Use this to teach your AI assistant how to support Kafka.Context users.
+It outputs a curated guide you can paste into ChatGPT/Copilot/Cursor so the AI can answer with correct APIs, constraints, and examples.
+Use `--rules` when you only want the conversation protocol and response style.
+
+```powershell
+kafka-context ai guide
+kafka-context ai guide --rules
+kafka-context ai guide --copy
+kafka-context ai guide --rules --copy
+```
+
+Options:
+- `--rules`: Output `ai_guide_conversation_rules.md` instead of `AI_DEVELOPMENT_GUIDE.md`.
+- `--copy`: Copy the output to the clipboard (best-effort).
+
+Notes:
+- Clipboard support uses OS-native tools: `clip` (Windows), `pbcopy` (macOS), `xclip`/`xsel` (Linux).
+- If no clipboard tool is available, the CLI prints a warning and still writes to stdout.
+
 ## What if a topic has multiple SR subjects?
 
 This CLI operates on **subjects**, not topics. If your environment has multiple subjects for a single topic, you must run `scaffold`/`verify` **per subject**.

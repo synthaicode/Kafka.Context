@@ -51,6 +51,15 @@ internal static class Program
                 }
             }
 
+            if (args.Length >= 2 && string.Equals(args[0], "ai", StringComparison.OrdinalIgnoreCase))
+            {
+                var sub = args[1];
+                var subArgs = args.Skip(2).ToArray();
+
+                if (string.Equals(sub, "guide", StringComparison.OrdinalIgnoreCase))
+                    return RunAiGuide(subArgs);
+            }
+
             Console.Error.WriteLine("Unknown command.");
             PrintHelp();
             return 2;
@@ -71,6 +80,7 @@ internal static class Program
         Console.WriteLine("  kafka-context schema verify   --subject <subject> [--type <assembly-qualified-type> | --fingerprint <hex>] [options]");
         Console.WriteLine("  kafka-context schema subjects [options]");
         Console.WriteLine("  kafka-context streaming flink with-preview [options]");
+        Console.WriteLine("  kafka-context ai guide [--rules] [--copy]");
         Console.WriteLine();
         Console.WriteLine("Options (shared):");
         Console.WriteLine("  --sr-url <url>       Schema Registry URL (or env KAFKA_CONTEXT_SCHEMA_REGISTRY_URL)");
@@ -99,6 +109,94 @@ internal static class Program
         Console.WriteLine("  --assembly <path[,path]>  Assembly path(s) to load POCOs for column DDL");
         Console.WriteLine("  --allow-missing-types  Allow topics without matching POCOs (fallback to skeleton)");
         Console.WriteLine("  --json               Output JSON");
+        Console.WriteLine();
+        Console.WriteLine("Options (ai guide):");
+        Console.WriteLine("  --rules              Output conversation rules instead of the main guide");
+        Console.WriteLine("  --copy               Copy the output to the clipboard (best-effort)");
+    }
+
+    private static int RunAiGuide(string[] args)
+    {
+        var useRules = HasFlag(args, "--rules");
+        var useCopy = HasFlag(args, "--copy");
+        var fileName = useRules ? "ai_guide_conversation_rules.md" : "AI_DEVELOPMENT_GUIDE.md";
+        var path = ResolveGuidePath(fileName);
+
+        if (!File.Exists(path))
+        {
+            Console.Error.WriteLine($"Guide file not found: {path}");
+            return 2;
+        }
+
+        var content = File.ReadAllText(path);
+        Console.WriteLine(content);
+
+        if (useCopy)
+        {
+            if (!TryCopyToClipboard(content))
+                Console.Error.WriteLine("Clipboard copy failed (no supported clipboard utility found).");
+        }
+
+        return 0;
+    }
+
+    private static string ResolveGuidePath(string fileName)
+    {
+        var baseDir = AppContext.BaseDirectory;
+        var candidate = Path.Combine(baseDir, fileName);
+        if (File.Exists(candidate))
+            return candidate;
+
+        // Fallback for local runs from repo root.
+        var repoCandidate = Path.Combine(baseDir, "..", "..", "..", "..", "docs", fileName);
+        return Path.GetFullPath(repoCandidate);
+    }
+
+    private static bool TryCopyToClipboard(string content)
+    {
+        if (OperatingSystem.IsWindows())
+            return TryRunClipboardProcess("cmd", "/c clip", content);
+
+        if (OperatingSystem.IsMacOS())
+            return TryRunClipboardProcess("pbcopy", "", content);
+
+        if (OperatingSystem.IsLinux())
+        {
+            if (TryRunClipboardProcess("xclip", "-selection clipboard", content))
+                return true;
+            if (TryRunClipboardProcess("xsel", "--clipboard --input", content))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryRunClipboardProcess(string fileName, string arguments, string content)
+    {
+        try
+        {
+            using var process = new System.Diagnostics.Process();
+            process.StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = fileName,
+                Arguments = arguments,
+                RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            if (!process.Start())
+                return false;
+
+            process.StandardInput.Write(content);
+            process.StandardInput.Close();
+            process.WaitForExit(3000);
+            return process.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static int RunFlinkWithPreview(string[] args)
