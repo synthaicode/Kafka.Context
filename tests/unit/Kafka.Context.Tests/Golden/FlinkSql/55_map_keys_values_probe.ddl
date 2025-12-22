@@ -1,0 +1,1 @@
+INSERT INTO `t_55_map_keys_values_probe` SELECT MAP['a', 1, 'b', 2] AS `M`, MAP_KEYS(MAP['a', 1, 'b', 2]) AS `Keys`, MAP_VALUES(MAP['a', 1, 'b', 2]) AS `Vals` FROM `probe` AS t0;

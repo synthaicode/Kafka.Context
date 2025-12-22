@@ -1,0 +1,1 @@
+INSERT INTO `t_03_groupby` SELECT t0.`CustomerId` AS `CustomerId`, COUNT(*) AS `Cnt`, SUM(t0.`Amount`) AS `SumAmount` FROM `orders` AS t0 GROUP BY t0.`CustomerId`;

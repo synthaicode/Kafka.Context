@@ -12,10 +12,11 @@ Source: https://github.com/synthaicode/Kafka.Context
 - Explicit failure handling (Retry / DLQ)
 
 ## Non-goals
-- No stream processing engine (Kafka Streams / Flink)
-- No query generation or DSL (no JOIN / Window / Aggregation)
+- No embedded stream processing engine (Kafka Streams / Flink runtime not bundled)
+- No ksqlDB dialect support (Flink-only streaming for now)
+- No generic SQL/OLAP query generator beyond the streaming DSL
 - No general-purpose Kafka client wrapper (this stays intentionally small)
-- No “external Schema Registry schema → POCO” mapping layer (consume assumes the Avro contract matches your POCO)
+- No runtime “Schema Registry schema → POCO” mapping layer (use the CLI scaffold/verify workflow)
 
 ## Docs
 - Repository map: `overview.md`
@@ -24,6 +25,7 @@ Source: https://github.com/synthaicode/Kafka.Context
 - Target usage shape: `docs/samples/target_code_shape.md`
 - Release workflow: `docs/workflows/release_roles_and_steps.md`
 - NuGet README (the package page text): `src/Kafka.Context/README.md`
+- Streaming API notes (Flink): `docs/wiki/streaming-api.md`
 - Schema scaffold/verify CLI (dotnet tool): https://www.nuget.org/packages/Kafka.Context.Cli
 
 ## Tests

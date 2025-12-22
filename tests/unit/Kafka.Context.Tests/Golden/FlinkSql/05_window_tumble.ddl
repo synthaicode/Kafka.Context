@@ -1,0 +1,1 @@
+INSERT INTO `t_05_window_tumble` SELECT t0.`CustomerId` AS `CustomerId`, window_start AS `WindowStart`, window_end AS `WindowEnd`, COUNT(*) AS `Cnt` FROM TABLE(TUMBLE(TABLE `orders`, DESCRIPTOR(`EventTime`), INTERVAL '5' SECOND)) AS t0 GROUP BY t0.`CustomerId`, window_start, window_end;

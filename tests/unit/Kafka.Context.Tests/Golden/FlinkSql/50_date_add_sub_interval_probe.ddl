@@ -1,0 +1,1 @@
+INSERT INTO `t_50_date_add_sub_interval_probe` SELECT DATE '2025-01-02' + INTERVAL '1' DAY AS `DatePlus1`, DATE '2025-01-02' - INTERVAL '1' DAY AS `DateMinus1`, CAST('2025-01-02 03:04:05' AS TIMESTAMP) + INTERVAL '5' MINUTE AS `TsPlus5Min` FROM `probe` AS t0;

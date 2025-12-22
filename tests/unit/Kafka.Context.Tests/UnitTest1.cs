@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Kafka.Context.Tests;
 
+[Trait("Level", "L1")]
 public class UnitTest1
 {
     [Fact]

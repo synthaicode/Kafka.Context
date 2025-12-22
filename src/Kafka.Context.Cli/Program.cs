@@ -3,7 +3,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Confluent.SchemaRegistry;
+using Kafka.Context.Configuration;
 using Kafka.Context.Attributes;
+using Kafka.Context.Streaming;
+using Kafka.Context.Streaming.Flink;
+using Microsoft.Extensions.Configuration;
 
 namespace Kafka.Context;
 
@@ -34,6 +38,19 @@ internal static class Program
                     return await RunSubjectsAsync(subArgs).ConfigureAwait(false);
             }
 
+            if (args.Length >= 3 && string.Equals(args[0], "streaming", StringComparison.OrdinalIgnoreCase))
+            {
+                var dialect = args[1];
+                var sub = args[2];
+                var subArgs = args.Skip(3).ToArray();
+
+                if (string.Equals(dialect, "flink", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(sub, "with-preview", StringComparison.OrdinalIgnoreCase))
+                {
+                    return RunFlinkWithPreview(subArgs);
+                }
+            }
+
             Console.Error.WriteLine("Unknown command.");
             PrintHelp();
             return 2;
@@ -53,6 +70,7 @@ internal static class Program
         Console.WriteLine("  kafka-context schema scaffold --subject <subject> [options]");
         Console.WriteLine("  kafka-context schema verify   --subject <subject> [--type <assembly-qualified-type> | --fingerprint <hex>] [options]");
         Console.WriteLine("  kafka-context schema subjects [options]");
+        Console.WriteLine("  kafka-context streaming flink with-preview [options]");
         Console.WriteLine();
         Console.WriteLine("Options (shared):");
         Console.WriteLine("  --sr-url <url>       Schema Registry URL (or env KAFKA_CONTEXT_SCHEMA_REGISTRY_URL)");
@@ -73,6 +91,364 @@ internal static class Program
         Console.WriteLine("  --prefix <prefix>    Filter subjects by prefix");
         Console.WriteLine("  --contains <text>    Filter subjects by substring");
         Console.WriteLine("  --json               Output JSON array");
+        Console.WriteLine();
+        Console.WriteLine("Options (streaming flink with-preview):");
+        Console.WriteLine("  --config <path>      appsettings.json path (default: ./appsettings.json)");
+        Console.WriteLine("  --topic <name>       Only show a single topic (optional)");
+        Console.WriteLine("  --kind <all|source|sink>  Filter by kind (default: all)");
+        Console.WriteLine("  --assembly <path[,path]>  Assembly path(s) to load POCOs for column DDL");
+        Console.WriteLine("  --allow-missing-types  Allow topics without matching POCOs (fallback to skeleton)");
+        Console.WriteLine("  --json               Output JSON");
+    }
+
+    private static int RunFlinkWithPreview(string[] args)
+    {
+        var configPath = GetOption(args, "--config") ?? "appsettings.json";
+        var topicFilter = GetOption(args, "--topic");
+        var kind = GetOption(args, "--kind") ?? "all";
+        var asJson = HasFlag(args, "--json");
+        var allowMissingTypes = HasFlag(args, "--allow-missing-types");
+        var assemblyArg = GetOption(args, "--assembly");
+        var hasAssembly = !string.IsNullOrWhiteSpace(assemblyArg);
+
+        if (!string.Equals(kind, "all", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(kind, "source", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(kind, "sink", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.Error.WriteLine("--kind must be 'all', 'source', or 'sink'.");
+            return 2;
+        }
+
+        var cfg = new ConfigurationBuilder()
+            .AddJsonFile(configPath, optional: false)
+            .Build();
+
+        var options = cfg.GetKsqlDslOptions();
+        var kafka = FlinkKafkaConnectorOptionsFactory.From(options);
+
+        var result = new FlinkWithPreviewResult
+        {
+            Format = kafka.Format,
+            BootstrapServers = kafka.BootstrapServers,
+            SchemaRegistryUrl = kafka.SchemaRegistryUrl,
+            GlobalWith = new Dictionary<string, string>(kafka.WithProperties, StringComparer.OrdinalIgnoreCase),
+            SourceTopics = new(),
+            SinkTopics = new(),
+            Warnings = new(),
+        };
+
+        if (string.IsNullOrWhiteSpace(kafka.SchemaRegistryUrl))
+            result.Warnings.Add($"'{FlinkKafkaConnectorOptions.SupportedFormat}' typically requires 'KsqlDsl:SchemaRegistry:Url'.");
+
+        foreach (var topic in kafka.SourceWithByTopic.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!string.IsNullOrWhiteSpace(topicFilter) && !string.Equals(topic, topicFilter, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (string.Equals(kind, "sink", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            result.SourceTopics[topic] = BuildWithDictionary(kafka, topic, isSink: false);
+        }
+
+        foreach (var topic in kafka.SinkWithByTopic.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!string.IsNullOrWhiteSpace(topicFilter) && !string.Equals(topic, topicFilter, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (string.Equals(kind, "source", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            result.SinkTopics[topic] = BuildWithDictionary(kafka, topic, isSink: true);
+        }
+
+        if (asJson)
+        {
+            Console.WriteLine(JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
+            return 0;
+        }
+
+        Console.WriteLine("-- Flink WITH preview (DDL)");
+        if (!hasAssembly)
+            Console.WriteLine("-- NOTE: no --assembly specified; column definitions are placeholders.");
+
+        if (result.Warnings.Count > 0)
+        {
+            foreach (var w in result.Warnings)
+                Console.WriteLine($"-- WARNING: {w}");
+        }
+
+        Console.WriteLine();
+
+        var dialectProvider = new FlinkDialectProvider(kafka, (_, _) => Task.CompletedTask);
+        var typeByTopic = LoadTypesByTopic(assemblyArg);
+
+        var sourceDefinitions = new List<StreamingSourceDefinition>();
+        var sourceSkeletons = new List<(string Topic, IReadOnlyDictionary<string, string> With)>();
+        foreach (var (topic, dict) in result.SourceTopics.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!typeByTopic.TryGetValue(topic, out var type))
+            {
+                if (hasAssembly && !allowMissingTypes)
+                    throw new InvalidOperationException($"Missing POCO for topic '{topic}'. Provide --assembly or use --allow-missing-types.");
+
+                sourceSkeletons.Add((topic, dict));
+                continue;
+            }
+
+            sourceDefinitions.Add(new StreamingSourceDefinition(
+                type,
+                topic,
+                dialectProvider.NormalizeObjectName(topic),
+                new StreamingSourceConfig(EventTime: null)));
+        }
+
+        foreach (var ddl in dialectProvider.GenerateSourceDdls(sourceDefinitions))
+        {
+            Console.WriteLine("-- source");
+            Console.WriteLine(ddl);
+            Console.WriteLine();
+        }
+
+        foreach (var (topic, dict) in sourceSkeletons)
+        {
+            Console.WriteLine(RenderCreateTableSkeleton(
+                dialectProvider,
+                topic,
+                dict,
+                header: $"-- source: {topic} (no POCO)"));
+            Console.WriteLine();
+        }
+
+        var sinkDefinitions = new List<StreamingSinkDefinition>();
+        var sinkSkeletons = new List<(string Topic, IReadOnlyDictionary<string, string> With)>();
+        foreach (var (topic, dict) in result.SinkTopics.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!typeByTopic.TryGetValue(topic, out var type))
+            {
+                if (hasAssembly && !allowMissingTypes)
+                    throw new InvalidOperationException($"Missing POCO for topic '{topic}'. Provide --assembly or use --allow-missing-types.");
+
+                sinkSkeletons.Add((topic, dict));
+                continue;
+            }
+
+            var pk = GetPrimaryKeyColumns(type);
+            sinkDefinitions.Add(new StreamingSinkDefinition(
+                type,
+                topic,
+                dialectProvider.NormalizeObjectName(topic),
+                StreamingSinkMode.AppendOnly,
+                pk));
+        }
+
+        foreach (var ddl in dialectProvider.GenerateSinkDdls(sinkDefinitions))
+        {
+            Console.WriteLine("-- sink");
+            Console.WriteLine(ddl);
+            Console.WriteLine();
+        }
+
+        foreach (var (topic, dict) in sinkSkeletons)
+        {
+            Console.WriteLine(RenderCreateTableSkeleton(
+                dialectProvider,
+                topic,
+                dict,
+                header: $"-- sink: {topic} (no POCO)"));
+            Console.WriteLine();
+        }
+
+        return 0;
+    }
+
+    private static string RenderCreateTableSkeleton(
+        FlinkDialectProvider dialectProvider,
+        string topic,
+        IReadOnlyDictionary<string, string> withProps,
+        string header)
+    {
+        var objectName = dialectProvider.NormalizeObjectName(topic);
+        var table = QuoteIdentifier(objectName);
+
+        var with = string.Join(
+            ",\n",
+            withProps
+                .OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(p => $"  '{p.Key}' = '{EscapeSingleQuotes(p.Value)}'"));
+
+        return string.Join(
+            "\n",
+            header,
+            $"CREATE TABLE IF NOT EXISTS {table} (",
+            "  -- TODO: columns",
+            ") WITH (",
+            with,
+            ");");
+    }
+
+    private static Dictionary<string, Type> LoadTypesByTopic(string? assemblyArg)
+    {
+        if (string.IsNullOrWhiteSpace(assemblyArg))
+            return new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+
+        var paths = assemblyArg
+            .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToArray();
+
+        var result = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        foreach (var path in paths)
+        {
+            var asm = Assembly.LoadFrom(path);
+            foreach (var type in asm.GetTypes())
+            {
+                if (!type.IsClass || type.IsAbstract)
+                    continue;
+
+                var topicAttr = type.GetCustomAttribute<KafkaTopicAttribute>(inherit: true);
+                if (topicAttr is null)
+                    continue;
+
+                if (!result.TryAdd(topicAttr.Name, type))
+                    throw new InvalidOperationException($"Duplicate KafkaTopic '{topicAttr.Name}' found in assemblies for types '{result[topicAttr.Name].FullName}' and '{type.FullName}'.");
+            }
+        }
+
+        return result;
+    }
+
+    private static IReadOnlyList<string> GetPrimaryKeyColumns(Type entityType)
+    {
+        var keys = entityType
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.GetCustomAttribute<KafkaKeyAttribute>(inherit: true) is not null)
+            .Select(p => p.Name)
+            .ToArray();
+
+        return keys;
+    }
+
+    private static string QuoteIdentifier(string identifier)
+    {
+        var escaped = identifier.Replace("`", "``", StringComparison.Ordinal);
+        return $"`{escaped}`";
+    }
+
+    private static string EscapeSingleQuotes(string value)
+    {
+        return value.Replace("'", "''", StringComparison.Ordinal);
+    }
+
+    private static Dictionary<string, string> BuildWithDictionary(FlinkKafkaConnectorOptions kafka, string topicName, bool isSink)
+    {
+        if (!string.Equals(kafka.Format, FlinkKafkaConnectorOptions.SupportedFormat, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Unsupported Flink Kafka format '{kafka.Format}'. Only '{FlinkKafkaConnectorOptions.SupportedFormat}' is supported.");
+
+        var props = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["connector"] = "kafka",
+            ["topic"] = topicName,
+            ["format"] = kafka.Format,
+        };
+
+        if (!string.IsNullOrWhiteSpace(kafka.BootstrapServers))
+            props["properties.bootstrap.servers"] = kafka.BootstrapServers;
+
+        if (!string.IsNullOrWhiteSpace(kafka.SchemaRegistryUrl))
+            props["schema.registry.url"] = kafka.SchemaRegistryUrl;
+
+        MergeWith(props, kafka.WithProperties, allowOverrideExisting: false);
+
+        if (!isSink && kafka.SourceWithByTopic.TryGetValue(topicName, out var sourceProps))
+            MergeWith(props, sourceProps, allowOverrideExisting: true);
+
+        if (isSink && kafka.SinkWithByTopic.TryGetValue(topicName, out var sinkProps))
+            MergeWith(props, sinkProps, allowOverrideExisting: true);
+
+        MergeWith(props, kafka.AdditionalProperties, allowOverrideExisting: false);
+
+        ValidateFlinkKafkaWith(props, isSink);
+
+        return props;
+    }
+
+    private static void MergeWith(Dictionary<string, string> target, IEnumerable<KeyValuePair<string, string>> additions, bool allowOverrideExisting)
+    {
+        foreach (var (k, v) in additions)
+        {
+            if (string.IsNullOrWhiteSpace(k))
+                continue;
+
+            if (IsProtectedWithKey(k))
+                throw new InvalidOperationException($"WITH property '{k}' is reserved and cannot be overridden.");
+
+            if (target.TryAdd(k, v))
+                continue;
+
+            if (string.Equals(target[k], v, StringComparison.Ordinal))
+                continue;
+
+            if (!allowOverrideExisting)
+                throw new InvalidOperationException($"Duplicate WITH property key detected: '{k}'.");
+
+            target[k] = v;
+        }
+    }
+
+    private static bool IsProtectedWithKey(string key)
+    {
+        return string.Equals(key, "connector", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "topic", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "format", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "properties.bootstrap.servers", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "schema.registry.url", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void ValidateFlinkKafkaWith(IReadOnlyDictionary<string, string> props, bool isSink)
+    {
+        if (isSink)
+            return;
+
+        if (!props.TryGetValue("scan.startup.mode", out var mode) || string.IsNullOrWhiteSpace(mode))
+            return;
+
+        mode = mode.Trim();
+
+        var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "earliest-offset",
+            "latest-offset",
+            "group-offsets",
+            "timestamp",
+            "specific-offsets",
+        };
+
+        if (!allowed.Contains(mode))
+            throw new InvalidOperationException($"Unsupported scan.startup.mode '{mode}'. Allowed: earliest-offset, latest-offset, group-offsets, timestamp, specific-offsets.");
+
+        if (string.Equals(mode, "timestamp", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!props.TryGetValue("scan.startup.timestamp-millis", out var millis) || string.IsNullOrWhiteSpace(millis))
+                throw new InvalidOperationException("scan.startup.mode=timestamp requires 'scan.startup.timestamp-millis'.");
+
+            if (!long.TryParse(millis, out var _))
+                throw new InvalidOperationException("scan.startup.timestamp-millis must be an integer (milliseconds since epoch).");
+        }
+
+        if (string.Equals(mode, "specific-offsets", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!props.TryGetValue("scan.startup.specific-offsets", out var offsets) || string.IsNullOrWhiteSpace(offsets))
+                throw new InvalidOperationException("scan.startup.mode=specific-offsets requires 'scan.startup.specific-offsets'.");
+        }
+    }
+
+    private sealed class FlinkWithPreviewResult
+    {
+        public string Format { get; init; } = "";
+        public string BootstrapServers { get; init; } = "";
+        public string SchemaRegistryUrl { get; init; } = "";
+        public Dictionary<string, string> GlobalWith { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, Dictionary<string, string>> SourceTopics { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, Dictionary<string, string>> SinkTopics { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+        public List<string> Warnings { get; init; } = new();
     }
 
     private static async Task<int> RunScaffoldAsync(string[] args)

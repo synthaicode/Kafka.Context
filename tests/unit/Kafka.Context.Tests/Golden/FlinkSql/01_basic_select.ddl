@@ -1,0 +1,1 @@
+INSERT INTO `t_01_basic_select` SELECT t0.`OrderId` AS `OrderId`, t0.`CustomerId` AS `CustomerId`, t0.`Amount` AS `Amount` FROM `orders` AS t0 WHERE (t0.`Amount` >= 100);

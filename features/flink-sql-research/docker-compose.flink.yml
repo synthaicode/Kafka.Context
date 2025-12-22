@@ -1,0 +1,32 @@
+services:
+  flink-jobmanager:
+    image: apache/flink:1.19.1-scala_2.12-java17
+    user: "0:0"
+    command: jobmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        parallelism.default: 1
+    volumes:
+      - ../../tools/flink/plugins:/opt/flink/plugins:ro
+      - ../../:/workspace
+      - flink_sql_out:/out
+
+  flink-taskmanager:
+    image: apache/flink:1.19.1-scala_2.12-java17
+    user: "0:0"
+    command: taskmanager
+    depends_on:
+      - flink-jobmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 2
+        parallelism.default: 1
+    volumes:
+      - ../../tools/flink/plugins:/opt/flink/plugins:ro
+      - ../../:/workspace
+      - flink_sql_out:/out
+
+volumes:
+  flink_sql_out:

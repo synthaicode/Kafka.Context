@@ -1,0 +1,1 @@
+INSERT INTO `t_29_json_paths_probe` SELECT JSON_VALUE('[10,20,30]', '$[1]') AS `Root1`, JSON_VALUE('[10,20,30]', 'lax $[1]') AS `LaxRoot1`, JSON_VALUE('{"a":[10,20]}', 'lax $.a[1]') AS `LaxA1`, JSON_VALUE('{"a":[10,20]}', 'strict $.a[1]') AS `StrictA1`, JSON_QUERY('{"a":[10,20]}', '$.a[1]') AS `QueryA1` FROM `probe` AS t0;

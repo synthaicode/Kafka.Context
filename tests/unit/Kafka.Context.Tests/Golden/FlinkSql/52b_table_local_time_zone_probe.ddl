@@ -1,0 +1,1 @@
+INSERT INTO `t_52b_table_local_time_zone_probe` SELECT 'UTC' AS `Zone`, TO_TIMESTAMP_LTZ(1700000000000, 3) AS `TsLtz` FROM `probe` AS t0;

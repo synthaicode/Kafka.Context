@@ -1,0 +1,1 @@
+INSERT INTO `t_28_json_object_array_probe` SELECT '{"a":[10,20]}' AS `RawJson`, JSON_QUERY('{"a":[10,20]}', '$.a') AS `A_Array`, JSON_VALUE('{"a":[10,20]}', '$.a[0]') AS `A0`, JSON_VALUE('{"a":[10,20]}', '$.a[1]') AS `A1`, CAST(JSON_VALUE('{"a":[10,20]}', '$.a[1]') AS INT) AS `A1_AsInt` FROM `probe` AS t0;

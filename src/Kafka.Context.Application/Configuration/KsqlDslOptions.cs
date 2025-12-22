@@ -6,6 +6,7 @@ public sealed class KsqlDslOptions
 {
     public CommonOptions Common { get; set; } = new();
     public SchemaRegistryOptions SchemaRegistry { get; set; } = new();
+    public StreamingOptions Streaming { get; set; } = new();
 
     public string DlqTopicName { get; set; } = "dead_letter_queue";
 
@@ -28,6 +29,9 @@ public sealed class SchemaRegistryOptions
 {
     public string Url { get; set; } = string.Empty;
     public SchemaRegistryMonitoringOptions Monitoring { get; set; } = new();
+
+    // Auto-register is intentionally disabled by default to fail-fast on missing SR entries.
+    public bool AutoRegisterSchemas { get; set; } = false;
 }
 
 public sealed class SchemaRegistryMonitoringOptions

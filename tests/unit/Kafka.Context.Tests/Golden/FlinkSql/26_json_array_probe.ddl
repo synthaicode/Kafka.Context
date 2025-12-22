@@ -1,0 +1,1 @@
+INSERT INTO `t_26_json_array_probe` SELECT JSON_VALUE('[10,20,30]', '$[0]') AS `FirstVal`, JSON_VALUE('{"a":[10,20]}', '$.a[1]') AS `SecondVal`, JSON_QUERY('{"a":[10,20]}', '$.a') AS `ArrJson` FROM `probe` AS t0;

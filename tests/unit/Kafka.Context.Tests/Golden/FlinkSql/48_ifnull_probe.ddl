@@ -1,0 +1,1 @@
+INSERT INTO `t_48_ifnull_probe` SELECT IFNULL(CAST(NULL AS STRING), 'fallback') AS `IfNullValue` FROM `probe` AS t0;

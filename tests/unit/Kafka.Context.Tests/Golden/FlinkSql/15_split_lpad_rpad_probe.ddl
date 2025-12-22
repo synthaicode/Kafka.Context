@@ -1,0 +1,1 @@
+INSERT INTO `t_15_split_lpad_rpad_probe` SELECT LPAD('7', 3, '0') AS `Lpad1`, RPAD('7', 3, '0') AS `Rpad1` FROM `probe` AS t0;

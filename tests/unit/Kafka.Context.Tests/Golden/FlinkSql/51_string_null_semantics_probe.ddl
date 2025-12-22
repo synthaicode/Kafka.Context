@@ -1,0 +1,1 @@
+INSERT INTO `t_51_string_null_semantics_probe` SELECT CONCAT('a', CAST(NULL AS STRING), 'b') AS `ConcatNull`, REPLACE(CAST(NULL AS STRING), 'a', 'b') AS `ReplaceNull`, CHAR_LENGTH(CAST(NULL AS STRING)) AS `LenNull`, TRIM(CAST(NULL AS STRING)) AS `TrimNull` FROM `probe` AS t0;

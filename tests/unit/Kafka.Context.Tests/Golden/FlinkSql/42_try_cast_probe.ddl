@@ -1,0 +1,1 @@
+INSERT INTO `t_42_try_cast_probe` SELECT TRY_CAST('123' AS INT) AS `TryCastInt_Ok`, TRY_CAST('x' AS INT) AS `TryCastInt_Bad`, TRY_CAST('2025-01-02 03:04:05' AS TIMESTAMP) AS `TryCastTimestamp` FROM `probe` AS t0;

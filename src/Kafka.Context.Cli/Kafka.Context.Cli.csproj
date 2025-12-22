@@ -17,6 +17,7 @@
     <RepositoryUrl>https://github.com/synthaicode/Kafka.Context</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/synthaicode/Kafka.Context</PackageProjectUrl>
+    <PackageTags>kafka;net;flink;schema-registry;entityframework;cli;design-time</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,10 +26,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kafka.Context.Abstractions\Kafka.Context.Abstractions.csproj" />
+    <ProjectReference Include="..\Kafka.Context.Application\Kafka.Context.Application.csproj" />
+    <ProjectReference Include="..\Kafka.Context\Kafka.Context.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Confluent.SchemaRegistry" Version="2.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

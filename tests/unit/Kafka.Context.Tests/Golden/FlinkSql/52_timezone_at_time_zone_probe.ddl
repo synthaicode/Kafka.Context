@@ -1,0 +1,1 @@
+INSERT INTO `t_52_timezone_at_time_zone_probe` SELECT CAST('2025-01-02 03:04:05' AS TIMESTAMP) AS `BaseTs`, TO_UTC_TIMESTAMP(CAST('2025-01-02 03:04:05' AS TIMESTAMP), 'Asia/Tokyo') AS `ToUtcFromTokyo`, FROM_UTC_TIMESTAMP(CAST('2025-01-02 03:04:05' AS TIMESTAMP), 'Asia/Tokyo') AS `FromUtcToTokyo` FROM `probe` AS t0;

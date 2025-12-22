@@ -1,0 +1,1 @@
+INSERT INTO `t_17_date_parts_functions_probe` SELECT DAYOFWEEK(t0.`EventTime`) AS `Dow`, DAYOFYEAR(t0.`EventTime`) AS `Doy` FROM `probe` AS t0;

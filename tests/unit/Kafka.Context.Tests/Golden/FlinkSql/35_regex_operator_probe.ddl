@@ -1,0 +1,1 @@
+INSERT INTO `t_35_regex_operator_probe` SELECT 'abc-123' REGEXP '^[a-z]+-[0-9]+$' AS `RegexpOp` FROM `probe` AS t0;

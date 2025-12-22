@@ -1,0 +1,1 @@
+INSERT INTO `t_16_split_index_probe` SELECT SPLIT_INDEX('a,b,c', ',', 0) AS `First0`, SPLIT_INDEX('a,b,c', ',', 1) AS `Second1` FROM `probe` AS t0;

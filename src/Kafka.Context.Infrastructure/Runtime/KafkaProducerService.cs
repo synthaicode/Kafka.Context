@@ -41,13 +41,21 @@ internal static class KafkaProducerService
             Url = options.SchemaRegistry.Url
         });
 
+        if (options.SchemaRegistry.AutoRegisterSchemas)
+            throw new InvalidOperationException("SchemaRegistry.AutoRegisterSchemas must be false. Register schemas before producing.");
+
         var valueSchemaJson = AvroSchemaBuilder.BuildValueSchema(typeof(T));
         var valueSchema = (Avro.RecordSchema)Avro.Schema.Parse(valueSchemaJson);
 
         var record = CreateRecord(valueSchema, entity);
 
+        var serializerConfig = new AvroSerializerConfig
+        {
+            AutoRegisterSchemas = false,
+        };
+
         using var producer = new ProducerBuilder<Null, GenericRecord>(producerConfig)
-            .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
+            .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry, serializerConfig))
             .Build();
 
         var message = new Message<Null, GenericRecord> { Value = record };

@@ -1,0 +1,1 @@
+INSERT INTO `t_13_cast_decimal_flink_ok` SELECT CAST('123' AS INT) AS `CastInt`, CAST('1234567890123' AS BIGINT) AS `CastBigInt`, CAST('1.23' AS DECIMAL(10, 2)) AS `CastDecimal`, CAST(1.2 AS DOUBLE) AS `CastDouble`, CAST(TRUE AS BOOLEAN) AS `CastBool`, CAST(NULL AS STRING) AS `CastNullString` FROM `probe` AS t0;

@@ -3,6 +3,7 @@ using System.Reflection;
 
 namespace Kafka.Context.Tests;
 
+[Trait("Level", "L1")]
 public class AvroSchemaBuilderTests
 {
     [Fact]

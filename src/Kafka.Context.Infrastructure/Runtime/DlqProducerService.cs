@@ -35,6 +35,9 @@ internal static class DlqProducerService
             Url = options.SchemaRegistry.Url
         });
 
+        if (options.SchemaRegistry.AutoRegisterSchemas)
+            throw new InvalidOperationException("SchemaRegistry.AutoRegisterSchemas must be false. Register schemas before producing.");
+
         var keySchemaJson = AvroSchemaBuilder.BuildKeySchema(typeof(DlqEnvelope));
         var valueSchemaJson = AvroSchemaBuilder.BuildValueSchema(typeof(DlqEnvelope));
 
@@ -44,9 +47,14 @@ internal static class DlqProducerService
         var keyRecord = CreateRecordFromEnvelopeKey(keySchema, envelope);
         var valueRecord = CreateRecord(valueSchema, envelope);
 
+        var serializerConfig = new AvroSerializerConfig
+        {
+            AutoRegisterSchemas = false,
+        };
+
         using var producer = new ProducerBuilder<GenericRecord, GenericRecord>(producerConfig)
-            .SetKeySerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
-            .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
+            .SetKeySerializer(new AvroSerializer<GenericRecord>(schemaRegistry, serializerConfig))
+            .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry, serializerConfig))
             .Build();
 
         var message = new Message<GenericRecord, GenericRecord> { Key = keyRecord, Value = valueRecord };

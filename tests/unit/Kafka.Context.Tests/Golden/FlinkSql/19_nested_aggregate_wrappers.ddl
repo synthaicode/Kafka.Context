@@ -1,0 +1,1 @@
+INSERT INTO `t_19_nested_aggregate_wrappers` SELECT t0.`CustomerId` AS `CustomerId`, ROUND(AVG(t0.`Amount`), 1) AS `AvgRounded1`, ROUND((SUM(t0.`Amount`) / CAST(COUNT(*) AS DOUBLE)), 1) AS `AvgEmulated1` FROM `orders` AS t0 GROUP BY t0.`CustomerId`;

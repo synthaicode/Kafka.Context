@@ -1,0 +1,1 @@
+INSERT INTO `t_04_having` SELECT t0.`CustomerId` AS `CustomerId`, COUNT(*) AS `Cnt` FROM `orders` AS t0 GROUP BY t0.`CustomerId` HAVING (COUNT(*) >= 5);

@@ -1,0 +1,1 @@
+INSERT INTO `t_11_datetime_extract_flink_ok` SELECT EXTRACT(YEAR FROM t0.`EventTime`) AS `YearPart`, EXTRACT(MONTH FROM t0.`EventTime`) AS `MonthPart`, EXTRACT(DAY FROM t0.`EventTime`) AS `DayPart`, EXTRACT(HOUR FROM t0.`EventTime`) AS `HourPart`, EXTRACT(MINUTE FROM t0.`EventTime`) AS `MinutePart`, EXTRACT(SECOND FROM t0.`EventTime`) AS `SecondPart` FROM `probe` AS t0;

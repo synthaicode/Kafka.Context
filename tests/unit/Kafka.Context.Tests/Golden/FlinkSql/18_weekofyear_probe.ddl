@@ -1,0 +1,1 @@
+INSERT INTO `t_18_weekofyear_probe` SELECT EXTRACT(WEEK FROM t0.`EventTime`) AS `WeekExtract`, DATE_FORMAT(t0.`EventTime`, 'w') AS `WeekFormat` FROM `probe` AS t0;

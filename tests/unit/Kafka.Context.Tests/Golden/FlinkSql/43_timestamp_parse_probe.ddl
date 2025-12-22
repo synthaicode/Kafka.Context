@@ -1,0 +1,1 @@
+INSERT INTO `t_43_timestamp_parse_probe` SELECT CAST('2025-01-02 03:04:05' AS TIMESTAMP) AS `CastTimestamp`, TO_TIMESTAMP('2025-01-02 03:04:05') AS `ToTimestamp_1Arg`, TO_TIMESTAMP('2025-01-02 03:04:05', 'yyyy-MM-dd HH:mm:ss') AS `ToTimestamp_2Arg`, CURRENT_TIMESTAMP AS `CurrentTimestamp` FROM `probe` AS t0;

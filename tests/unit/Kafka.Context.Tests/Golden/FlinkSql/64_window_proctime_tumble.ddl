@@ -1,0 +1,1 @@
+INSERT INTO `t_64_window_proctime_tumble` SELECT window_start AS `WindowStart`, window_end AS `WindowEnd`, t0.`CustomerId` AS `CustomerId`, COUNT(*) AS `Cnt` FROM TABLE(TUMBLE(TABLE `orders`, DESCRIPTOR(PROCTIME()), INTERVAL '5' SECOND)) AS t0 GROUP BY t0.`CustomerId`, window_start, window_end;

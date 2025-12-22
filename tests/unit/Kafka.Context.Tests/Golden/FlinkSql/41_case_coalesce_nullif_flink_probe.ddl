@@ -1,0 +1,1 @@
+INSERT INTO `t_41_case_coalesce_nullif_flink_probe` SELECT 'ok' AS `CaseWhen`, COALESCE(NULL, 'fallback') AS `Coalesced`, NULLIF(1, 1) AS `NullIf_Equal`, NULLIF(1, 2) AS `NullIf_NotEqual` FROM `probe` AS t0;

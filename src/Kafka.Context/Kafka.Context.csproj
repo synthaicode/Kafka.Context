@@ -7,7 +7,7 @@
     <RepositoryUrl>https://github.com/synthaicode/Kafka.Context</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/synthaicode/Kafka.Context</PackageProjectUrl>
-    <PackageTags>kafka;csharp;context;schema-registry;provisioning;infrastructure</PackageTags>
+    <PackageTags>kafka;net;flink;schema-registry;entityframework</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

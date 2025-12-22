@@ -1,0 +1,1 @@
+INSERT INTO `t_61_window_session` SELECT window_start AS `WindowStart`, window_end AS `WindowEnd`, t0.`CustomerId` AS `CustomerId`, COUNT(*) AS `Cnt` FROM TABLE(SESSION(TABLE `orders`, DESCRIPTOR(`EventTime`), INTERVAL '10' SECOND)) AS t0 GROUP BY t0.`CustomerId`, window_start, window_end;

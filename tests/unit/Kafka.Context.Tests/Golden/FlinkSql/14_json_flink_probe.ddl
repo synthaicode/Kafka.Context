@@ -1,0 +1,1 @@
+INSERT INTO `t_14_json_flink_probe` SELECT JSON_VALUE('{"a":1,"b":{"c":"x"}}', '$.a') AS `A`, JSON_VALUE('{"a":1,"b":{"c":"x"}}', '$.b.c') AS `BC` FROM `probe` AS t0;

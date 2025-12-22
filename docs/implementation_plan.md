@@ -2,6 +2,11 @@
 
 この文書は Kafka.Context の MVP を「実装→検証→公開」まで進めるための実装計画を示す。
 
+## ステータス
+
+- MVP は **達成済み**（本ドキュメントは「達成した計画の記録」として残す）。
+- Streaming の要件・設計は `docs/kafka-context-streaming-spec.md` と `docs/kafka-context-master-plan.md` を正とする。
+
 ## ゴール（MVP）
 - Context 作成 → Provisioning（Kafka topic + Schema Registry） → `AddAsync` / `ForEachAsync`
 - 失敗時: Retry（fixed/既定 1s/3回）→ DLQ（raw payload なし、`DlqEnvelope`）
@@ -17,6 +22,8 @@
 ## スコープ境界（Non-Goals）
 - ksqlDB エンジン/クエリ生成（Window/JOIN/集約）
 - Bus/Worker などの実行フレームワーク
+
+> 注: 上記 Non-Goals は「MVP スコープ外」を指す。Streaming の検討/実装を否定するものではない。
 
 ## マイルストーン
 

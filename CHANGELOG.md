@@ -6,7 +6,11 @@ This project follows Semantic Versioning (SemVer).
 
 ## Unreleased
 
-- (TBD)
+- [BREAKING] Remove entity access modes (readOnly/writeOnly): `IModelBuilder.Entity<T>` no longer accepts flags and `EventSet<T>` no longer enforces read/write constraints.
+- Streaming (spec): define query registry as context-instance scoped (no static global registry).
+- Streaming (Flink): window/join constraints, output/sink modes, and DDL generation for sources/sinks/queries.
+- CLI: `streaming flink with-preview` now outputs DDL and can include columns via `--assembly`.
+- Schema Registry: auto-register schemas forced off to keep SR contracts explicit.
 
 ## 1.1.0 - 2025-12-20
 

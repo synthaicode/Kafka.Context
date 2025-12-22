@@ -1,0 +1,1 @@
+INSERT INTO `t_24_uuid_guid_probe` SELECT CAST('550e8400-e29b-41d4-a716-446655440000' AS STRING) AS `GuidString`, UUID() AS `UuidFn` FROM `probe` AS t0;

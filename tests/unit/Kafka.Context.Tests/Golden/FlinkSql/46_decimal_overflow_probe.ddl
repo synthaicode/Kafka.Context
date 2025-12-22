@@ -1,0 +1,1 @@
+INSERT INTO `t_46_decimal_overflow_probe` SELECT CAST(123.45 AS DECIMAL(10, 2)) AS `DecOk`, TRY_CAST('12345678901234567890.12' AS DECIMAL(10, 2)) AS `DecTooBig_TryCast` FROM `probe` AS t0;

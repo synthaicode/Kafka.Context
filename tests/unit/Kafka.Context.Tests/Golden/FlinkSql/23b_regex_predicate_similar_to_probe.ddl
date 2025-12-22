@@ -1,0 +1,1 @@
+INSERT INTO `t_23b_regex_predicate_similar_to_probe` SELECT 'abc-123' SIMILAR TO '[a-z]+-[0-9]+' AS `SimilarToOk` FROM `probe` AS t0;

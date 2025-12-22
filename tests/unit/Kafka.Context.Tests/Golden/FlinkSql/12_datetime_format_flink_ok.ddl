@@ -1,0 +1,1 @@
+INSERT INTO `t_12_datetime_format_flink_ok` SELECT DATE_FORMAT(t0.`EventTime`, 'yyyy-MM-dd HH:mm:ss') AS `DateFormat`, TIMESTAMPADD(MINUTE, 5, t0.`EventTime`) AS `AddMinutes`, TIMESTAMPADD(DAY, 1, t0.`EventTime`) AS `AddDays` FROM `probe` AS t0;

@@ -1,0 +1,1 @@
+INSERT INTO `t_36_json_exists_probe` SELECT JSON_EXISTS('{"a":[10,20]}', '$.a[1]') AS `ExistsA1`, JSON_EXISTS('{"a":[10,20]}', '$.a[9]') AS `ExistsA9` FROM `probe` AS t0;

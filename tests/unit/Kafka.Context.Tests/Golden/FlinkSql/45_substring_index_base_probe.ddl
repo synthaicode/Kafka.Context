@@ -1,0 +1,1 @@
+INSERT INTO `t_45_substring_index_base_probe` SELECT SUBSTRING('abcdef', 1, 3) AS `Sub_0_3`, SUBSTRING('abcdef', 2, 3) AS `Sub_1_3`, SUBSTRING('abcdef', 3, 3) AS `Sub_2_3` FROM `probe` AS t0;

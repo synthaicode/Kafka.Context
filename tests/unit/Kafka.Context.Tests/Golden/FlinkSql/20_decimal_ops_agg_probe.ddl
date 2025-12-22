@@ -1,0 +1,1 @@
+INSERT INTO `t_20_decimal_ops_agg_probe` SELECT t0.`Symbol` AS `Symbol`, ROUND(AVG(CAST(t0.`Px` AS DECIMAL(18, 4))), 2) AS `AvgPx`, SUM(CAST(t0.`Px` AS DECIMAL(18, 4))) AS `SumPx` FROM `prices` AS t0 GROUP BY t0.`Symbol`;

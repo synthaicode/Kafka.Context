@@ -1,0 +1,1 @@
+INSERT INTO `t_57_like_escape_probe` SELECT 'a_b' LIKE 'a^_b' ESCAPE '^' AS `LikeLiteralUnderscore`, 'a%b' LIKE 'a^%b' ESCAPE '^' AS `LikeLiteralPercent`, 'a_b' LIKE 'a_b' AS `LikeWildcardUnderscore`, 'a%b' LIKE 'a%b' AS `LikeWildcardPercent` FROM `probe` AS t0;

@@ -40,8 +40,26 @@ Kafka.Context.Configuration.KsqlDslOptions.DlqTopicName.set -> void
 Kafka.Context.Configuration.KsqlDslOptions.KsqlDslOptions() -> void
 Kafka.Context.Configuration.KsqlDslOptions.SchemaRegistry.get -> Kafka.Context.Configuration.SchemaRegistryOptions!
 Kafka.Context.Configuration.KsqlDslOptions.SchemaRegistry.set -> void
+Kafka.Context.Configuration.KsqlDslOptions.Streaming.get -> Kafka.Context.Configuration.StreamingOptions!
+Kafka.Context.Configuration.KsqlDslOptions.Streaming.set -> void
 Kafka.Context.Configuration.KsqlDslOptions.Topics.get -> System.Collections.Generic.Dictionary<string!, Kafka.Context.Configuration.TopicSection!>!
 Kafka.Context.Configuration.KsqlDslOptions.Topics.set -> void
+Kafka.Context.Configuration.StreamingOptions
+Kafka.Context.Configuration.StreamingOptions.StreamingOptions() -> void
+Kafka.Context.Configuration.StreamingOptions.Flink.get -> Kafka.Context.Configuration.FlinkStreamingOptions!
+Kafka.Context.Configuration.StreamingOptions.Flink.set -> void
+Kafka.Context.Configuration.FlinkStreamingOptions
+Kafka.Context.Configuration.FlinkStreamingOptions.FlinkStreamingOptions() -> void
+Kafka.Context.Configuration.FlinkStreamingOptions.ScanStartupMode.get -> string!
+Kafka.Context.Configuration.FlinkStreamingOptions.ScanStartupMode.set -> void
+Kafka.Context.Configuration.FlinkStreamingOptions.SourceGroupIdByTopic.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Kafka.Context.Configuration.FlinkStreamingOptions.SourceGroupIdByTopic.set -> void
+Kafka.Context.Configuration.FlinkStreamingOptions.Sinks.get -> System.Collections.Generic.Dictionary<string!, System.Collections.Generic.Dictionary<string!, string!>!>!
+Kafka.Context.Configuration.FlinkStreamingOptions.Sinks.set -> void
+Kafka.Context.Configuration.FlinkStreamingOptions.Sources.get -> System.Collections.Generic.Dictionary<string!, System.Collections.Generic.Dictionary<string!, string!>!>!
+Kafka.Context.Configuration.FlinkStreamingOptions.Sources.set -> void
+Kafka.Context.Configuration.FlinkStreamingOptions.With.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Kafka.Context.Configuration.FlinkStreamingOptions.With.set -> void
 Kafka.Context.Configuration.SchemaRegistryMonitoringOptions
 Kafka.Context.Configuration.SchemaRegistryMonitoringOptions.SchemaRegistryMonitoringOptions() -> void
 Kafka.Context.Configuration.SchemaRegistryMonitoringOptions.SubjectWaitMaxAttempts.get -> int
@@ -52,6 +70,8 @@ Kafka.Context.Configuration.SchemaRegistryOptions
 Kafka.Context.Configuration.SchemaRegistryOptions.Monitoring.get -> Kafka.Context.Configuration.SchemaRegistryMonitoringOptions!
 Kafka.Context.Configuration.SchemaRegistryOptions.Monitoring.set -> void
 Kafka.Context.Configuration.SchemaRegistryOptions.SchemaRegistryOptions() -> void
+Kafka.Context.Configuration.SchemaRegistryOptions.AutoRegisterSchemas.get -> bool
+Kafka.Context.Configuration.SchemaRegistryOptions.AutoRegisterSchemas.set -> void
 Kafka.Context.Configuration.SchemaRegistryOptions.Url.get -> string!
 Kafka.Context.Configuration.SchemaRegistryOptions.Url.set -> void
 Kafka.Context.Configuration.TopicConsumerSection

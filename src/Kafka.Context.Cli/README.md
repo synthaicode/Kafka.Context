@@ -90,6 +90,48 @@ JSON output:
 kafka-context schema subjects --sr-url http://127.0.0.1:18081 --json
 ```
 
+### 4) `streaming flink with-preview`
+
+Preview merged Flink Kafka connector `WITH (...)` properties from `appsettings.json` as **DDL**.
+
+```powershell
+kafka-context streaming flink with-preview --config ./appsettings.json
+```
+
+With POCO assemblies (include column definitions):
+
+```powershell
+kafka-context streaming flink with-preview --config ./appsettings.json --assembly ./MyApp.dll
+```
+
+Filter:
+
+```powershell
+kafka-context streaming flink with-preview --config ./appsettings.json --kind source
+kafka-context streaming flink with-preview --config ./appsettings.json --kind sink --topic orders
+```
+
+JSON output:
+
+```powershell
+kafka-context streaming flink with-preview --config ./appsettings.json --json
+```
+
+Notes:
+- If `--assembly` is provided, the CLI loads POCOs with `[KafkaTopic]` to emit column definitions.
+- If no matching POCO exists, use `--allow-missing-types` to fall back to skeleton output.
+
+This command reads:
+- `KsqlDsl:Common` (bootstrap + security properties)
+- `KsqlDsl:SchemaRegistry` (Schema Registry URL)
+- `KsqlDsl:Streaming:Flink:With` (global WITH)
+- `KsqlDsl:Streaming:Flink:Sources` (per-topic source WITH)
+- `KsqlDsl:Streaming:Flink:Sinks` (per-topic sink WITH)
+
+Additional options:
+- `--assembly <path[,path]>`: Load assemblies to resolve POCOs by `[KafkaTopic]` name.
+- `--allow-missing-types`: Allow topics without matching POCOs (placeholder columns).
+
 ## What if a topic has multiple SR subjects?
 
 This CLI operates on **subjects**, not topics. If your environment has multiple subjects for a single topic, you must run `scaffold`/`verify` **per subject**.

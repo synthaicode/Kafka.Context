@@ -90,6 +90,10 @@ kafka-context schema verify --sr-url http://127.0.0.1:18081 --subject <topic>-va
 ### 4.3 Physical tests（対象変更時は必須）
 物理テストは Windows 前提で、docker-compose を起動して実行する。
 
+Flink SQL の互換性検証ルール:
+- `reports/flink_sql` の全件を **DDL生成UT（Golden）** で固定する。
+- リリース前には、同じ全件を **物理テスト** で再確認する。
+
 ```powershell
 docker compose -f docs/environment/docker-compose.current.yml up -d
 $env:KAFKA_CONTEXT_PHYSICAL = '1'

@@ -1,0 +1,1 @@
+INSERT INTO `t_47_array_map_probe` SELECT ARRAY[10, 20, 30] AS `Arr`, CARDINALITY(ARRAY[10, 20, 30]) AS `ArrLen`, ARRAY[10, 20, 30][1] AS `ArrIdx1`, MAP['a', 1, 'b', 2] AS `M`, MAP['a', 1, 'b', 2]['a'] AS `MapGetA` FROM `probe` AS t0;

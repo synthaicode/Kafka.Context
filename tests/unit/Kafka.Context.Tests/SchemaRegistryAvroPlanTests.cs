@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Kafka.Context.Tests;
 
+[Trait("Level", "L4")]
 public sealed class SchemaRegistryAvroPlanTests
 {
     [Fact]

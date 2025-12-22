@@ -1,0 +1,1 @@
+INSERT INTO `t_53_epoch_millis_to_timestamp_probe` SELECT TO_TIMESTAMP_LTZ(1700000000000, 3) AS `TsLtzFromMillis`, TO_TIMESTAMP_LTZ(1700000000, 0) AS `TsLtzFromSeconds` FROM `probe` AS t0;

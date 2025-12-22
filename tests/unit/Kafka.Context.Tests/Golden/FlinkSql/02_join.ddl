@@ -1,0 +1,1 @@
+INSERT INTO `t_02_join` SELECT t0.`OrderId` AS `OrderId`, t0.`CustomerId` AS `CustomerId`, t1.`Name` AS `Name`, t0.`Amount` AS `Amount` FROM `orders` AS t0 JOIN `customers` AS t1 ON (t0.`CustomerId` = t1.`CustomerId`);

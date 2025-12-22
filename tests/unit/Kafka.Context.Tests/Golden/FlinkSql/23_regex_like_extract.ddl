@@ -1,0 +1,1 @@
+INSERT INTO `t_23_regex_like_extract` SELECT REGEXP_EXTRACT('abc-123', '([a-z]+)-([0-9]+)', 1) AS `Extract1`, REGEXP_EXTRACT('abc-123', '([a-z]+)-([0-9]+)', 2) AS `Extract2`, REGEXP_REPLACE('a---b', '-+', '-') AS `Replaced` FROM `probe` AS t0;
