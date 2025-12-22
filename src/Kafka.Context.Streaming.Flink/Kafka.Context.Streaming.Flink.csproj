@@ -1,9 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-    <AssemblyName>Kafka.Context</AssemblyName>
-    <RootNamespace>Kafka.Context</RootNamespace>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyName>Kafka.Context.Streaming.Flink</AssemblyName>
+    <RootNamespace>Kafka.Context.Streaming.Flink</RootNamespace>
     <RepositoryUrl>https://github.com/synthaicode/Kafka.Context</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/synthaicode/Kafka.Context</PackageProjectUrl>
@@ -11,24 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Kafka.Context.Abstractions\Kafka.Context.Abstractions.csproj" />
-    <ProjectReference Include="..\Kafka.Context.Application\Kafka.Context.Application.csproj" />
-    <ProjectReference Include="..\Kafka.Context.Messaging\Kafka.Context.Messaging.csproj" />
-    <ProjectReference Include="..\Kafka.Context.Infrastructure\Kafka.Context.Infrastructure.csproj" />
     <ProjectReference Include="..\Kafka.Context.Streaming.Abstractions\Kafka.Context.Streaming.Abstractions.csproj" />
     <ProjectReference Include="..\Kafka.Context.Streaming\Kafka.Context.Streaming.csproj" />
+    <ProjectReference Include="..\Kafka.Context.Abstractions\Kafka.Context.Abstractions.csproj" />
+    <ProjectReference Include="..\Kafka.Context.Application\Kafka.Context.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="4.14.0" PrivateAssets="all">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>

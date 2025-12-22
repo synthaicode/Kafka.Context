@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Kafka.Context\Kafka.Context.csproj" />
+    <ProjectReference Include="..\..\src\Kafka.Context.Streaming.Flink\Kafka.Context.Streaming.Flink.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,4 +18,3 @@
   </PropertyGroup>
 
 </Project>
-

@@ -81,30 +81,3 @@ static Kafka.Context.SchemaRegistryAvroPlan.operator ==(Kafka.Context.SchemaRegi
 virtual Kafka.Context.KafkaContext.DisposeAsync() -> System.Threading.Tasks.ValueTask
 virtual Kafka.Context.KafkaContext.OnModelCreating(Kafka.Context.Abstractions.IModelBuilder! modelBuilder) -> void
 virtual Kafka.Context.KafkaContext.ResolveStreamingDialectProvider() -> Kafka.Context.Streaming.IStreamingDialectProvider?
-Kafka.Context.Streaming.Flink.FlinkDialectProvider
-Kafka.Context.Streaming.Flink.FlinkDialectProvider.FlinkDialectProvider(System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! executeAsync) -> void
-Kafka.Context.Streaming.Flink.FlinkDialectProvider.FlinkDialectProvider(Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions! kafka, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task!>! executeAsync) -> void
-Kafka.Context.Streaming.Flink.FlinkDialectProvider.ExecuteAsync(string! ddl, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Kafka.Context.Streaming.Flink.FlinkDialectProvider.GenerateDdl(Kafka.Context.Streaming.StreamingQueryPlan! plan, Kafka.Context.Streaming.StreamingStatementKind kind, Kafka.Context.Streaming.StreamingOutputMode outputMode, string! objectName, string! outputTopic) -> string!
-Kafka.Context.Streaming.Flink.FlinkDialectProvider.GenerateSinkDdls(System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingSinkDefinition!>! sinks) -> System.Collections.Generic.IReadOnlyList<string!>!
-Kafka.Context.Streaming.Flink.FlinkDialectProvider.GenerateSourceDdls(System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingSourceDefinition!>! sources) -> System.Collections.Generic.IReadOnlyList<string!>!
-Kafka.Context.Streaming.Flink.FlinkDialectProvider.NormalizeObjectName(string! suggestedObjectName) -> string!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.FlinkKafkaConnectorOptions() -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.AdditionalProperties.get -> System.Collections.Generic.Dictionary<string!, string!>!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.AdditionalProperties.set -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SinkWithByTopic.get -> System.Collections.Generic.Dictionary<string!, System.Collections.Generic.Dictionary<string!, string!>!>!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SinkWithByTopic.set -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SourceWithByTopic.get -> System.Collections.Generic.Dictionary<string!, System.Collections.Generic.Dictionary<string!, string!>!>!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SourceWithByTopic.set -> void
-const Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SupportedFormat = "avro-confluent" -> string!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.BootstrapServers.get -> string!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.BootstrapServers.set -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.Format.get -> string!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.Format.set -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SchemaRegistryUrl.get -> string!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SchemaRegistryUrl.set -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.WithProperties.get -> System.Collections.Generic.Dictionary<string!, string!>!
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.WithProperties.set -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptionsFactory
-static Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptionsFactory.From(Kafka.Context.Configuration.KsqlDslOptions! options) -> Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions!

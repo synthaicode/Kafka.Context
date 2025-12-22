@@ -31,12 +31,11 @@
 - Kafka topic create-if-missing（AdminClient）: `docs/contracts/provisioning_kafka.md`
 
 ## Non-Goals（明示）
-- ストリームクエリ（Window / JOIN / 集約）
 - 実行フレームワーク（Bus / Worker / Throttle 等）
 - KafkaFlow の代替（否定ではなく別の上位抽象）
 
 ## フォルダ早見表
-- `src/` NuGet のソース（`Kafka.Context`）
+- `src/` NuGet のソース（`Kafka.Context` / `Kafka.Context.Streaming*`）
 - `tests/` テスト（unit/physical）
 - `examples/` 利用サンプル
 - `docs/`

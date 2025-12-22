@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Kafka.Context\Kafka.Context.csproj" />
     <ProjectReference Include="..\..\..\src\Kafka.Context.Infrastructure\Kafka.Context.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Kafka.Context.Streaming.Flink\Kafka.Context.Streaming.Flink.csproj" />
   </ItemGroup>
 
 </Project>

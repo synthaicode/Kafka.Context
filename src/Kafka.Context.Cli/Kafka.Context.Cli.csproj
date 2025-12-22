@@ -28,6 +28,7 @@
     <ProjectReference Include="..\Kafka.Context.Abstractions\Kafka.Context.Abstractions.csproj" />
     <ProjectReference Include="..\Kafka.Context.Application\Kafka.Context.Application.csproj" />
     <ProjectReference Include="..\Kafka.Context\Kafka.Context.csproj" />
+    <ProjectReference Include="..\Kafka.Context.Streaming.Flink\Kafka.Context.Streaming.Flink.csproj" />
   </ItemGroup>
 
   <ItemGroup>
