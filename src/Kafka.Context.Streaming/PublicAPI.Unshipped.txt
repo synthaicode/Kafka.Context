@@ -19,3 +19,179 @@ static Kafka.Context.Streaming.StreamingQueryableExtensions.Where<T>(this Kafka.
 static Kafka.Context.Streaming.StreamingQueryableExtensions.Where<T1, T2, T3, T4>(this Kafka.Context.Streaming.IStreamingQueryable<T1!, T2!, T3!, T4!>! source, System.Linq.Expressions.Expression<System.Func<T1!, T2!, T3!, T4!, bool>!>! predicate) -> Kafka.Context.Streaming.IStreamingQueryable<T1!, T2!, T3!, T4!>!
 static Kafka.Context.Streaming.StreamingQueryableExtensions.Where<T1, T2, T3>(this Kafka.Context.Streaming.IStreamingQueryable<T1!, T2!, T3!>! source, System.Linq.Expressions.Expression<System.Func<T1!, T2!, T3!, bool>!>! predicate) -> Kafka.Context.Streaming.IStreamingQueryable<T1!, T2!, T3!>!
 static Kafka.Context.Streaming.StreamingQueryableExtensions.Where<T1, T2>(this Kafka.Context.Streaming.IStreamingQueryable<T1!, T2!>! source, System.Linq.Expressions.Expression<System.Func<T1!, T2!, bool>!>! predicate) -> Kafka.Context.Streaming.IStreamingQueryable<T1!, T2!>!
+Kafka.Context.Streaming.IStreamingCatalogDdlProvider
+Kafka.Context.Streaming.IStreamingCatalogDdlProvider.GenerateSinkDdls(System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingSinkDefinition!>! sinks) -> System.Collections.Generic.IReadOnlyList<string!>!
+Kafka.Context.Streaming.IStreamingCatalogDdlProvider.GenerateSourceDdls(System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingSourceDefinition!>! sources) -> System.Collections.Generic.IReadOnlyList<string!>!
+Kafka.Context.Streaming.IStreamingDialectProvider
+Kafka.Context.Streaming.IStreamingDialectProvider.ExecuteAsync(string! ddl, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Kafka.Context.Streaming.IStreamingDialectProvider.GenerateDdl(Kafka.Context.Streaming.StreamingQueryPlan! plan, Kafka.Context.Streaming.StreamingStatementKind kind, Kafka.Context.Streaming.StreamingOutputMode outputMode, string! objectName, string! outputTopic) -> string!
+Kafka.Context.Streaming.IStreamingDialectProvider.NormalizeObjectName(string! suggestedObjectName) -> string!
+Kafka.Context.Streaming.IStreamingQueryable
+Kafka.Context.Streaming.IStreamingQueryable.Plan.get -> Kafka.Context.Streaming.StreamingQueryPlan!
+Kafka.Context.Streaming.IStreamingQueryable<T>
+Kafka.Context.Streaming.IStreamingQueryable<T1, T2, T3, T4>
+Kafka.Context.Streaming.IStreamingQueryable<T1, T2, T3>
+Kafka.Context.Streaming.IStreamingQueryable<T1, T2>
+Kafka.Context.Streaming.IStreamingQueryBuilder
+Kafka.Context.Streaming.IStreamingQueryBuilder.From<T>() -> Kafka.Context.Streaming.IStreamingQueryable<T!>!
+Kafka.Context.Streaming.IStreamingQueryRegistry
+Kafka.Context.Streaming.IStreamingQueryRegistry.Add(System.Type! derivedType, System.Func<Kafka.Context.Streaming.IStreamingQueryBuilder!, Kafka.Context.Streaming.IStreamingQueryable!>! queryFactory, Kafka.Context.Streaming.StreamingOutputMode outputMode, Kafka.Context.Streaming.StreamingSinkMode sinkMode) -> void
+Kafka.Context.Streaming.IStreamingQueryRegistry.GetAll() -> System.Collections.Generic.IReadOnlyList<Kafka.Context.Streaming.StreamingQueryDefinition!>!
+Kafka.Context.Streaming.IStreamingQueryRegistryProvider
+Kafka.Context.Streaming.IStreamingQueryRegistryProvider.StreamingQueries.get -> Kafka.Context.Streaming.IStreamingQueryRegistry!
+Kafka.Context.Streaming.IStreamingSourceRegistry
+Kafka.Context.Streaming.IStreamingSourceRegistry.AddOrUpdate(System.Type! entityType, Kafka.Context.Streaming.StreamingSourceConfig! config) -> void
+Kafka.Context.Streaming.IStreamingSourceRegistry.TryGet(System.Type! entityType, out Kafka.Context.Streaming.StreamingSourceConfig! config) -> bool
+Kafka.Context.Streaming.IStreamingSourceRegistryProvider
+Kafka.Context.Streaming.IStreamingSourceRegistryProvider.StreamingSources.get -> Kafka.Context.Streaming.IStreamingSourceRegistry!
+Kafka.Context.Streaming.StreamingEventTimeConfig
+Kafka.Context.Streaming.StreamingEventTimeConfig.<Clone>$() -> Kafka.Context.Streaming.StreamingEventTimeConfig!
+Kafka.Context.Streaming.StreamingEventTimeConfig.ColumnName.get -> string!
+Kafka.Context.Streaming.StreamingEventTimeConfig.ColumnName.init -> void
+Kafka.Context.Streaming.StreamingEventTimeConfig.Deconstruct(out string! ColumnName, out Kafka.Context.Streaming.StreamingTimestampSource Source, out System.TimeSpan WatermarkDelay) -> void
+Kafka.Context.Streaming.StreamingEventTimeConfig.Equals(Kafka.Context.Streaming.StreamingEventTimeConfig? other) -> bool
+Kafka.Context.Streaming.StreamingEventTimeConfig.Source.get -> Kafka.Context.Streaming.StreamingTimestampSource
+Kafka.Context.Streaming.StreamingEventTimeConfig.Source.init -> void
+Kafka.Context.Streaming.StreamingEventTimeConfig.StreamingEventTimeConfig(string! ColumnName, Kafka.Context.Streaming.StreamingTimestampSource Source, System.TimeSpan WatermarkDelay) -> void
+Kafka.Context.Streaming.StreamingEventTimeConfig.WatermarkDelay.get -> System.TimeSpan
+Kafka.Context.Streaming.StreamingEventTimeConfig.WatermarkDelay.init -> void
+Kafka.Context.Streaming.StreamingOutputMode
+Kafka.Context.Streaming.StreamingOutputMode.Changelog = 0 -> Kafka.Context.Streaming.StreamingOutputMode
+Kafka.Context.Streaming.StreamingOutputMode.Final = 1 -> Kafka.Context.Streaming.StreamingOutputMode
+Kafka.Context.Streaming.StreamingQueryDefinition
+Kafka.Context.Streaming.StreamingQueryDefinition.<Clone>$() -> Kafka.Context.Streaming.StreamingQueryDefinition!
+Kafka.Context.Streaming.StreamingQueryDefinition.Deconstruct(out System.Type! DerivedType, out System.Func<Kafka.Context.Streaming.IStreamingQueryBuilder!, Kafka.Context.Streaming.IStreamingQueryable!>! QueryFactory, out Kafka.Context.Streaming.StreamingOutputMode OutputMode, out Kafka.Context.Streaming.StreamingSinkMode SinkMode) -> void
+Kafka.Context.Streaming.StreamingQueryDefinition.DerivedType.get -> System.Type!
+Kafka.Context.Streaming.StreamingQueryDefinition.DerivedType.init -> void
+Kafka.Context.Streaming.StreamingQueryDefinition.Equals(Kafka.Context.Streaming.StreamingQueryDefinition? other) -> bool
+Kafka.Context.Streaming.StreamingQueryDefinition.OutputMode.get -> Kafka.Context.Streaming.StreamingOutputMode
+Kafka.Context.Streaming.StreamingQueryDefinition.OutputMode.init -> void
+Kafka.Context.Streaming.StreamingQueryDefinition.QueryFactory.get -> System.Func<Kafka.Context.Streaming.IStreamingQueryBuilder!, Kafka.Context.Streaming.IStreamingQueryable!>!
+Kafka.Context.Streaming.StreamingQueryDefinition.QueryFactory.init -> void
+Kafka.Context.Streaming.StreamingQueryDefinition.SinkMode.get -> Kafka.Context.Streaming.StreamingSinkMode
+Kafka.Context.Streaming.StreamingQueryDefinition.SinkMode.init -> void
+Kafka.Context.Streaming.StreamingQueryDefinition.StreamingQueryDefinition(System.Type! DerivedType, System.Func<Kafka.Context.Streaming.IStreamingQueryBuilder!, Kafka.Context.Streaming.IStreamingQueryable!>! QueryFactory, Kafka.Context.Streaming.StreamingOutputMode OutputMode, Kafka.Context.Streaming.StreamingSinkMode SinkMode) -> void
+Kafka.Context.Streaming.StreamingQueryPlan
+Kafka.Context.Streaming.StreamingQueryPlan.<Clone>$() -> Kafka.Context.Streaming.StreamingQueryPlan!
+Kafka.Context.Streaming.StreamingQueryPlan.Equals(Kafka.Context.Streaming.StreamingQueryPlan? other) -> bool
+Kafka.Context.Streaming.StreamingQueryPlan.GroupByKeySelector.get -> System.Linq.Expressions.LambdaExpression?
+Kafka.Context.Streaming.StreamingQueryPlan.GroupByKeySelector.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.HasAggregate.get -> bool
+Kafka.Context.Streaming.StreamingQueryPlan.HasAggregate.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.HasGroupBy.get -> bool
+Kafka.Context.Streaming.StreamingQueryPlan.HasGroupBy.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.HasHaving.get -> bool
+Kafka.Context.Streaming.StreamingQueryPlan.HasHaving.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.HavingPredicate.get -> System.Linq.Expressions.LambdaExpression?
+Kafka.Context.Streaming.StreamingQueryPlan.HavingPredicate.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.JoinPredicates.get -> System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.LambdaExpression!>!
+Kafka.Context.Streaming.StreamingQueryPlan.JoinPredicates.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.SelectSelector.get -> System.Linq.Expressions.LambdaExpression?
+Kafka.Context.Streaming.StreamingQueryPlan.SelectSelector.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.SinkMode.get -> Kafka.Context.Streaming.StreamingSinkMode
+Kafka.Context.Streaming.StreamingQueryPlan.SinkMode.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.SourceTopics.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Kafka.Context.Streaming.StreamingQueryPlan.SourceTopics.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.SourceTypes.get -> System.Collections.Generic.IReadOnlyList<System.Type!>!
+Kafka.Context.Streaming.StreamingQueryPlan.SourceTypes.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.StreamingQueryPlan(System.Collections.Generic.IReadOnlyList<System.Type!>! sourceTypes, bool hasGroupBy, bool hasAggregate, bool hasHaving) -> void
+Kafka.Context.Streaming.StreamingQueryPlan.WherePredicates.get -> System.Collections.Generic.IReadOnlyList<System.Linq.Expressions.LambdaExpression!>!
+Kafka.Context.Streaming.StreamingQueryPlan.WherePredicates.init -> void
+Kafka.Context.Streaming.StreamingQueryPlan.Window.get -> Kafka.Context.Streaming.StreamingWindowSpec?
+Kafka.Context.Streaming.StreamingQueryPlan.Window.init -> void
+Kafka.Context.Streaming.StreamingSinkDefinition
+Kafka.Context.Streaming.StreamingSinkDefinition.<Clone>$() -> Kafka.Context.Streaming.StreamingSinkDefinition!
+Kafka.Context.Streaming.StreamingSinkDefinition.Deconstruct(out System.Type! EntityType, out string! TopicName, out string! ObjectName, out Kafka.Context.Streaming.StreamingSinkMode SinkMode, out System.Collections.Generic.IReadOnlyList<string!>! PrimaryKeyColumns) -> void
+Kafka.Context.Streaming.StreamingSinkDefinition.EntityType.get -> System.Type!
+Kafka.Context.Streaming.StreamingSinkDefinition.EntityType.init -> void
+Kafka.Context.Streaming.StreamingSinkDefinition.Equals(Kafka.Context.Streaming.StreamingSinkDefinition? other) -> bool
+Kafka.Context.Streaming.StreamingSinkDefinition.ObjectName.get -> string!
+Kafka.Context.Streaming.StreamingSinkDefinition.ObjectName.init -> void
+Kafka.Context.Streaming.StreamingSinkDefinition.PrimaryKeyColumns.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Kafka.Context.Streaming.StreamingSinkDefinition.PrimaryKeyColumns.init -> void
+Kafka.Context.Streaming.StreamingSinkDefinition.SinkMode.get -> Kafka.Context.Streaming.StreamingSinkMode
+Kafka.Context.Streaming.StreamingSinkDefinition.SinkMode.init -> void
+Kafka.Context.Streaming.StreamingSinkDefinition.StreamingSinkDefinition(System.Type! EntityType, string! TopicName, string! ObjectName, Kafka.Context.Streaming.StreamingSinkMode SinkMode, System.Collections.Generic.IReadOnlyList<string!>! PrimaryKeyColumns) -> void
+Kafka.Context.Streaming.StreamingSinkDefinition.TopicName.get -> string!
+Kafka.Context.Streaming.StreamingSinkDefinition.TopicName.init -> void
+Kafka.Context.Streaming.StreamingSinkMode
+Kafka.Context.Streaming.StreamingSinkMode.AppendOnly = 0 -> Kafka.Context.Streaming.StreamingSinkMode
+Kafka.Context.Streaming.StreamingSinkMode.Upsert = 1 -> Kafka.Context.Streaming.StreamingSinkMode
+Kafka.Context.Streaming.StreamingSourceConfig
+Kafka.Context.Streaming.StreamingSourceConfig.<Clone>$() -> Kafka.Context.Streaming.StreamingSourceConfig!
+Kafka.Context.Streaming.StreamingSourceConfig.Deconstruct(out Kafka.Context.Streaming.StreamingEventTimeConfig? EventTime) -> void
+Kafka.Context.Streaming.StreamingSourceConfig.Equals(Kafka.Context.Streaming.StreamingSourceConfig? other) -> bool
+Kafka.Context.Streaming.StreamingSourceConfig.EventTime.get -> Kafka.Context.Streaming.StreamingEventTimeConfig?
+Kafka.Context.Streaming.StreamingSourceConfig.EventTime.init -> void
+Kafka.Context.Streaming.StreamingSourceConfig.StreamingSourceConfig(Kafka.Context.Streaming.StreamingEventTimeConfig? EventTime) -> void
+Kafka.Context.Streaming.StreamingSourceDefinition
+Kafka.Context.Streaming.StreamingSourceDefinition.<Clone>$() -> Kafka.Context.Streaming.StreamingSourceDefinition!
+Kafka.Context.Streaming.StreamingSourceDefinition.Config.get -> Kafka.Context.Streaming.StreamingSourceConfig!
+Kafka.Context.Streaming.StreamingSourceDefinition.Config.init -> void
+Kafka.Context.Streaming.StreamingSourceDefinition.Deconstruct(out System.Type! EntityType, out string! TopicName, out string! ObjectName, out Kafka.Context.Streaming.StreamingSourceConfig! Config) -> void
+Kafka.Context.Streaming.StreamingSourceDefinition.EntityType.get -> System.Type!
+Kafka.Context.Streaming.StreamingSourceDefinition.EntityType.init -> void
+Kafka.Context.Streaming.StreamingSourceDefinition.Equals(Kafka.Context.Streaming.StreamingSourceDefinition? other) -> bool
+Kafka.Context.Streaming.StreamingSourceDefinition.ObjectName.get -> string!
+Kafka.Context.Streaming.StreamingSourceDefinition.ObjectName.init -> void
+Kafka.Context.Streaming.StreamingSourceDefinition.StreamingSourceDefinition(System.Type! EntityType, string! TopicName, string! ObjectName, Kafka.Context.Streaming.StreamingSourceConfig! Config) -> void
+Kafka.Context.Streaming.StreamingSourceDefinition.TopicName.get -> string!
+Kafka.Context.Streaming.StreamingSourceDefinition.TopicName.init -> void
+Kafka.Context.Streaming.StreamingStatementKind
+Kafka.Context.Streaming.StreamingStatementKind.StreamInsert = 0 -> Kafka.Context.Streaming.StreamingStatementKind
+Kafka.Context.Streaming.StreamingStatementKind.TableCtas = 1 -> Kafka.Context.Streaming.StreamingStatementKind
+Kafka.Context.Streaming.StreamingTimestampSource
+Kafka.Context.Streaming.StreamingTimestampSource.KafkaRecordTimestamp = 1 -> Kafka.Context.Streaming.StreamingTimestampSource
+Kafka.Context.Streaming.StreamingTimestampSource.PayloadColumn = 0 -> Kafka.Context.Streaming.StreamingTimestampSource
+Kafka.Context.Streaming.StreamingWindowKind
+Kafka.Context.Streaming.StreamingWindowKind.Hop = 1 -> Kafka.Context.Streaming.StreamingWindowKind
+Kafka.Context.Streaming.StreamingWindowKind.Session = 2 -> Kafka.Context.Streaming.StreamingWindowKind
+Kafka.Context.Streaming.StreamingWindowKind.Tumble = 0 -> Kafka.Context.Streaming.StreamingWindowKind
+Kafka.Context.Streaming.StreamingWindowSpec
+Kafka.Context.Streaming.StreamingWindowSpec.<Clone>$() -> Kafka.Context.Streaming.StreamingWindowSpec!
+Kafka.Context.Streaming.StreamingWindowSpec.Deconstruct(out Kafka.Context.Streaming.StreamingWindowKind Kind, out string! TimeColumnName, out System.TimeSpan Size, out System.TimeSpan? Slide) -> void
+Kafka.Context.Streaming.StreamingWindowSpec.Equals(Kafka.Context.Streaming.StreamingWindowSpec? other) -> bool
+Kafka.Context.Streaming.StreamingWindowSpec.Kind.get -> Kafka.Context.Streaming.StreamingWindowKind
+Kafka.Context.Streaming.StreamingWindowSpec.Kind.init -> void
+Kafka.Context.Streaming.StreamingWindowSpec.Size.get -> System.TimeSpan
+Kafka.Context.Streaming.StreamingWindowSpec.Size.init -> void
+Kafka.Context.Streaming.StreamingWindowSpec.Slide.get -> System.TimeSpan?
+Kafka.Context.Streaming.StreamingWindowSpec.Slide.init -> void
+Kafka.Context.Streaming.StreamingWindowSpec.StreamingWindowSpec(Kafka.Context.Streaming.StreamingWindowKind Kind, string! TimeColumnName, System.TimeSpan Size, System.TimeSpan? Slide) -> void
+Kafka.Context.Streaming.StreamingWindowSpec.TimeColumnName.get -> string!
+Kafka.Context.Streaming.StreamingWindowSpec.TimeColumnName.init -> void
+override Kafka.Context.Streaming.StreamingEventTimeConfig.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingEventTimeConfig.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingEventTimeConfig.ToString() -> string!
+override Kafka.Context.Streaming.StreamingQueryDefinition.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingQueryDefinition.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingQueryDefinition.ToString() -> string!
+override Kafka.Context.Streaming.StreamingQueryPlan.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingQueryPlan.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingQueryPlan.ToString() -> string!
+override Kafka.Context.Streaming.StreamingSinkDefinition.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingSinkDefinition.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingSinkDefinition.ToString() -> string!
+override Kafka.Context.Streaming.StreamingSourceConfig.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingSourceConfig.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingSourceConfig.ToString() -> string!
+override Kafka.Context.Streaming.StreamingSourceDefinition.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingSourceDefinition.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingSourceDefinition.ToString() -> string!
+override Kafka.Context.Streaming.StreamingWindowSpec.Equals(object? obj) -> bool
+override Kafka.Context.Streaming.StreamingWindowSpec.GetHashCode() -> int
+override Kafka.Context.Streaming.StreamingWindowSpec.ToString() -> string!
+static Kafka.Context.Streaming.StreamingEventTimeConfig.operator !=(Kafka.Context.Streaming.StreamingEventTimeConfig? left, Kafka.Context.Streaming.StreamingEventTimeConfig? right) -> bool
+static Kafka.Context.Streaming.StreamingEventTimeConfig.operator ==(Kafka.Context.Streaming.StreamingEventTimeConfig? left, Kafka.Context.Streaming.StreamingEventTimeConfig? right) -> bool
+static Kafka.Context.Streaming.StreamingQueryDefinition.operator !=(Kafka.Context.Streaming.StreamingQueryDefinition? left, Kafka.Context.Streaming.StreamingQueryDefinition? right) -> bool
+static Kafka.Context.Streaming.StreamingQueryDefinition.operator ==(Kafka.Context.Streaming.StreamingQueryDefinition? left, Kafka.Context.Streaming.StreamingQueryDefinition? right) -> bool
+static Kafka.Context.Streaming.StreamingQueryPlan.operator !=(Kafka.Context.Streaming.StreamingQueryPlan? left, Kafka.Context.Streaming.StreamingQueryPlan? right) -> bool
+static Kafka.Context.Streaming.StreamingQueryPlan.operator ==(Kafka.Context.Streaming.StreamingQueryPlan? left, Kafka.Context.Streaming.StreamingQueryPlan? right) -> bool
+static Kafka.Context.Streaming.StreamingSinkDefinition.operator !=(Kafka.Context.Streaming.StreamingSinkDefinition? left, Kafka.Context.Streaming.StreamingSinkDefinition? right) -> bool
+static Kafka.Context.Streaming.StreamingSinkDefinition.operator ==(Kafka.Context.Streaming.StreamingSinkDefinition? left, Kafka.Context.Streaming.StreamingSinkDefinition? right) -> bool
+static Kafka.Context.Streaming.StreamingSourceConfig.operator !=(Kafka.Context.Streaming.StreamingSourceConfig? left, Kafka.Context.Streaming.StreamingSourceConfig? right) -> bool
+static Kafka.Context.Streaming.StreamingSourceConfig.operator ==(Kafka.Context.Streaming.StreamingSourceConfig? left, Kafka.Context.Streaming.StreamingSourceConfig? right) -> bool
+static Kafka.Context.Streaming.StreamingSourceDefinition.operator !=(Kafka.Context.Streaming.StreamingSourceDefinition? left, Kafka.Context.Streaming.StreamingSourceDefinition? right) -> bool
+static Kafka.Context.Streaming.StreamingSourceDefinition.operator ==(Kafka.Context.Streaming.StreamingSourceDefinition? left, Kafka.Context.Streaming.StreamingSourceDefinition? right) -> bool
+static Kafka.Context.Streaming.StreamingWindowSpec.operator !=(Kafka.Context.Streaming.StreamingWindowSpec? left, Kafka.Context.Streaming.StreamingWindowSpec? right) -> bool
+static Kafka.Context.Streaming.StreamingWindowSpec.operator ==(Kafka.Context.Streaming.StreamingWindowSpec? left, Kafka.Context.Streaming.StreamingWindowSpec? right) -> bool

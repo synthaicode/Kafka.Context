@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Kafka.Context.Streaming.Abstractions\Kafka.Context.Streaming.Abstractions.csproj" />
     <ProjectReference Include="..\Kafka.Context.Abstractions\Kafka.Context.Abstractions.csproj" />
   </ItemGroup>
 

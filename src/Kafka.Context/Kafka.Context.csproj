@@ -19,7 +19,6 @@
     <ProjectReference Include="..\Kafka.Context.Application\Kafka.Context.Application.csproj" />
     <ProjectReference Include="..\Kafka.Context.Messaging\Kafka.Context.Messaging.csproj" />
     <ProjectReference Include="..\Kafka.Context.Infrastructure\Kafka.Context.Infrastructure.csproj" />
-    <ProjectReference Include="..\Kafka.Context.Streaming.Abstractions\Kafka.Context.Streaming.Abstractions.csproj" />
     <ProjectReference Include="..\Kafka.Context.Streaming\Kafka.Context.Streaming.csproj" />
   </ItemGroup>
 

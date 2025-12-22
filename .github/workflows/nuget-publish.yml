@@ -51,10 +51,8 @@ jobs:
       - name: Pack (stable)
         run: |
           dotnet pack src/Kafka.Context.Abstractions/Kafka.Context.Abstractions.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
-          dotnet pack src/Kafka.Context.Streaming.Abstractions/Kafka.Context.Streaming.Abstractions.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context.Streaming/Kafka.Context.Streaming.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context.Streaming.Flink/Kafka.Context.Streaming.Flink.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
-          dotnet pack src/Kafka.Context.Streaming.KsqlDb/Kafka.Context.Streaming.KsqlDb.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context.Messaging/Kafka.Context.Messaging.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context.Application/Kafka.Context.Application.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
           dotnet pack src/Kafka.Context.Infrastructure/Kafka.Context.Infrastructure.csproj -c Release -o ./artifacts/nuget -p:Version=${{ steps.ver.outputs.version }}
