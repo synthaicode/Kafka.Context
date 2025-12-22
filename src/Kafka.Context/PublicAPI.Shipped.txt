@@ -97,7 +97,7 @@ Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SinkWithByTopic.get -> 
 Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SinkWithByTopic.set -> void
 Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SourceWithByTopic.get -> System.Collections.Generic.Dictionary<string!, System.Collections.Generic.Dictionary<string!, string!>!>!
 Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SourceWithByTopic.set -> void
-Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SupportedFormat = avro-confluent -> string!
+const Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.SupportedFormat = "avro-confluent" -> string!
 Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.BootstrapServers.get -> string!
 Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.BootstrapServers.set -> void
 Kafka.Context.Streaming.Flink.FlinkKafkaConnectorOptions.Format.get -> string!
