@@ -18,6 +18,7 @@ Source: https://github.com/synthaicode/Kafka.Context
 - No “external Schema Registry schema → POCO” mapping layer (consume assumes the Avro contract matches your POCO)
 
 ## Docs
+- **AI Development Guide** (GitHub Copilot, Cursor, Claude): `AI_DEVELOPMENT_GUIDE.md`
 - Repository map: `overview.md`
 - Contracts (Avro / DLQ / provisioning): `docs/contracts/`
 - appsettings.json guide (EN): `docs/contracts/appsettings.en.md`
