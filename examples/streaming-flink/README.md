@@ -15,3 +15,6 @@ Flink dialect `ToQuery(...)` samples.
 ```powershell
 dotnet run --project examples/streaming-flink/FlinkStreamingExamples.csproj
 ```
+
+## AI Assist
+If you're unsure how to use this package, run `kafka-context ai guide --copy` and paste the output into your AI assistant.

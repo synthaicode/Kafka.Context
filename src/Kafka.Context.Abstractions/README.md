@@ -39,3 +39,6 @@ See https://www.nuget.org/packages/Kafka.Context.Cli.
 ## Next steps
 - Main package README: https://github.com/synthaicode/Kafka.Context
 - Configuration reference (`appsettings.json`): https://github.com/synthaicode/Kafka.Context/blob/main/docs/contracts/appsettings.en.md
+
+## AI Assist
+If you're unsure how to use this package, run `kafka-context ai guide --copy` and paste the output into your AI assistant.

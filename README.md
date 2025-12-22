@@ -32,3 +32,6 @@ Source: https://github.com/synthaicode/Kafka.Context
 ## Tests
 - Unit: `dotnet test tests/unit/Kafka.Context.Tests/Kafka.Context.Tests.csproj -c Release`
 - Physical (Windows + Docker): `tests/physical/Kafka.Context.PhysicalTests` (see `docs/workflows/release_roles_and_steps.md`)
+
+## AI Assist
+If you're unsure how to use this package, run `kafka-context ai guide --copy` and paste the output into your AI assistant.

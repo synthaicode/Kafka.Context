@@ -17,7 +17,7 @@
     <RepositoryUrl>https://github.com/synthaicode/Kafka.Context</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/synthaicode/Kafka.Context</PackageProjectUrl>
-    <PackageTags>kafka;net;flink;schema-registry;entityframework;cli;design-time</PackageTags>
+    <PackageTags>kafka;net;flink;schema-registry;entityframework;cli;design-time;ai-assist</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

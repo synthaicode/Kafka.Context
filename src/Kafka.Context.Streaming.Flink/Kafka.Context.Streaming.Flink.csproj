@@ -6,7 +6,8 @@
     <RepositoryUrl>https://github.com/synthaicode/Kafka.Context</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/synthaicode/Kafka.Context</PackageProjectUrl>
-    <PackageTags>kafka;net;flink;schema-registry;entityframework</PackageTags>
+    <PackageTags>kafka;net;flink;schema-registry;entityframework;ai-assist</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +27,10 @@
     <None Remove="PublicAPI.Unshipped.txt" />
     <Content Remove="PublicAPI.Shipped.txt" />
     <Content Remove="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(StrictPublicApi)' != 'true'">

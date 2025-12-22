@@ -18,3 +18,6 @@ Kafka が起動している前提で、入力へ `AddAsync` し、出力を `For
 dotnet run --project examples/streaming-flink-flow/FlinkStreamingFlowExample.csproj -- --run
 ```
 
+
+## AI Assist
+If you're unsure how to use this package, run `kafka-context ai guide --copy` and paste the output into your AI assistant.

@@ -7,3 +7,6 @@ This package is not intended to be referenced directly in typical applications; 
 ## Next steps
 - Main package README: https://github.com/synthaicode/Kafka.Context
 - Schema scaffold/verify CLI: https://www.nuget.org/packages/Kafka.Context.Cli
+
+## AI Assist
+If you're unsure how to use this package, run `kafka-context ai guide --copy` and paste the output into your AI assistant.
