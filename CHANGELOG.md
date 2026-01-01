@@ -6,6 +6,10 @@ This project follows Semantic Versioning (SemVer).
 
 ## Unreleased
 
+## 1.2.2 - 2026-01-01
+
+- Add PackageLicenseExpression=MIT to all project files for NuGet metadata.
+
 ## 1.2.1 - 2026-01-01
 
 - Make manual commit tracking thread-safe and propagate cancellation to DLQ production.

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+・ｿ<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Kafka.Context\Kafka.Context.csproj" />
@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -17,3 +18,4 @@
   </PropertyGroup>
 
 </Project>
+

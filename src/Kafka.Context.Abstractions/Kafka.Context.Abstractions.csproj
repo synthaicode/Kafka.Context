@@ -1,5 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+・ｿ<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <AssemblyName>Kafka.Context.Abstractions</AssemblyName>
     <RootNamespace>Kafka.Context</RootNamespace>
@@ -31,3 +32,4 @@
     <NoWarn>$(NoWarn);RS0016;RS0017</NoWarn>
   </PropertyGroup>
 </Project>
+

@@ -6,5 +6,6 @@
 
     <!-- Lockstep package version (overridden by CI -p:Version=...) -->
     <VersionPrefix>1.2.0</VersionPrefix>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
