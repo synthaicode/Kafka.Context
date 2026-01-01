@@ -56,55 +56,60 @@ internal static class KafkaConsumerService
 
         await Task.Yield();
 
-        while (!cancellationToken.IsCancellationRequested)
+        try
         {
-            ConsumeResult<Ignore, GenericRecord>? result = null;
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                result = consumer.Consume(cancellationToken);
+                ConsumeResult<Ignore, GenericRecord>? result = null;
+                try
+                {
+                    result = consumer.Consume(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                if (result?.Message?.Value is null)
+                    continue;
+
+                var headers = ExtractHeaders(result.Message.Headers);
+
+                var timestampUtc = result.Message.Timestamp.Type == TimestampType.NotAvailable
+                    ? string.Empty
+                    : DateTimeOffset.FromUnixTimeMilliseconds(result.Message.Timestamp.UnixTimestampMs).UtcDateTime.ToString("O");
+
+                var meta = new MessageMeta(
+                    result.Topic,
+                    result.Partition.Value,
+                    result.Offset.Value,
+                    timestampUtc);
+
+                T entity;
+                try
+                {
+                    entity = AvroGenericMapper.MapTo<T>(result.Message.Value);
+                }
+                catch (Exception ex)
+                {
+                    if (onMappingError is not null)
+                        await onMappingError(result.Topic, result.Partition.Value, result.Offset.Value, timestampUtc, headers, autoCommit, ex).ConfigureAwait(false);
+
+                    consumer.Commit(result);
+                    continue;
+                }
+
+                if (!autoCommit)
+                    registerCommit(meta, () => consumer.Commit(result));
+
+                await action(entity, headers, meta).ConfigureAwait(false);
+                logger?.LogDebug("Consumed {Topic} {Partition}:{Offset}", result.Topic, result.Partition.Value, result.Offset.Value);
             }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-
-            if (result?.Message?.Value is null)
-                continue;
-
-            var headers = ExtractHeaders(result.Message.Headers);
-
-            var timestampUtc = result.Message.Timestamp.Type == TimestampType.NotAvailable
-                ? string.Empty
-                : DateTimeOffset.FromUnixTimeMilliseconds(result.Message.Timestamp.UnixTimestampMs).UtcDateTime.ToString("O");
-
-            var meta = new MessageMeta(
-                result.Topic,
-                result.Partition.Value,
-                result.Offset.Value,
-                timestampUtc);
-
-            T entity;
-            try
-            {
-                entity = AvroGenericMapper.MapTo<T>(result.Message.Value);
-            }
-            catch (Exception ex)
-            {
-                if (onMappingError is not null)
-                    await onMappingError(result.Topic, result.Partition.Value, result.Offset.Value, timestampUtc, headers, autoCommit, ex).ConfigureAwait(false);
-
-                consumer.Commit(result);
-                continue;
-            }
-
-            if (!autoCommit)
-                registerCommit(meta, () => consumer.Commit(result));
-
-            await action(entity, headers, meta).ConfigureAwait(false);
-            logger?.LogDebug("Consumed {Topic} {Partition}:{Offset}", result.Topic, result.Partition.Value, result.Offset.Value);
         }
-
-        consumer.Close();
+        finally
+        {
+            consumer.Close();
+        }
     }
 
     internal static void ApplyTopicConsumerConfig(KsqlDslOptions options, string topic, ConsumerConfig consumerConfig)

@@ -2,6 +2,7 @@ using Avro.Generic;
 using Kafka.Context.Diagnostics;
 using Kafka.Context.Messaging;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace Kafka.Context;
 
@@ -10,7 +11,7 @@ public sealed class DynamicTopicSet
     private readonly KafkaContext _context;
     private readonly string _topic;
     private ErrorHandlingPolicy _policy = new();
-    private readonly Dictionary<MessageMeta, Action> _manualCommit = new();
+    private readonly ConcurrentDictionary<MessageMeta, Action> _manualCommit = new();
 
     internal DynamicTopicSet(KafkaContext context, string topic)
     {
@@ -77,11 +78,11 @@ public sealed class DynamicTopicSet
 
                 try
                 {
-                    await ExecuteWithPolicyAsync(key, value, headers, meta, autoCommit, action).ConfigureAwait(false);
+                    await ExecuteWithPolicyAsync(key, value, headers, meta, autoCommit, action, cancellationToken).ConfigureAwait(false);
                 }
                 finally
                 {
-                    if (!autoCommit && _manualCommit.Remove(meta))
+                    if (!autoCommit && _manualCommit.TryRemove(meta, out _))
                     {
                         _context.Logger?.LogWarning(
                             "Manual commit was not called for {Topic} offset {Offset}",
@@ -100,10 +101,9 @@ public sealed class DynamicTopicSet
     {
         if (meta is null) throw new ArgumentNullException(nameof(meta));
 
-        if (_manualCommit.TryGetValue(meta, out var commit))
+        if (_manualCommit.TryRemove(meta, out var commit))
         {
             commit();
-            _manualCommit.Remove(meta);
             KafkaContextMetrics.ManualCommit("Dynamic", meta.Topic);
             return;
         }
@@ -120,7 +120,8 @@ public sealed class DynamicTopicSet
         Dictionary<string, string> headers,
         MessageMeta meta,
         bool autoCommit,
-        Func<object?, GenericRecord, Dictionary<string, string>, MessageMeta, Task> action)
+        Func<object?, GenericRecord, Dictionary<string, string>, MessageMeta, Task> action,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -167,7 +168,7 @@ public sealed class DynamicTopicSet
 
             if (_policy.ErrorAction == ErrorAction.DLQ)
             {
-                await SendToDlqAsync(meta, headers, ex, phase: "handler_error").ConfigureAwait(false);
+                await SendToDlqAsync(meta, headers, ex, phase: "handler_error", cancellationToken).ConfigureAwait(false);
             }
 
             if (!autoCommit)
@@ -199,10 +200,15 @@ public sealed class DynamicTopicSet
             return Task.CompletedTask;
 
         var meta = new MessageMeta(topic, partition, offset, timestampUtc);
-        return SendToDlqAsync(meta, headers, ex, phase: "mapping_error");
+        return SendToDlqAsync(meta, headers, ex, phase: "mapping_error", CancellationToken.None);
     }
 
-    private Task SendToDlqAsync(MessageMeta meta, Dictionary<string, string> headers, Exception ex, string phase)
+    private Task SendToDlqAsync(
+        MessageMeta meta,
+        Dictionary<string, string> headers,
+        Exception ex,
+        string phase,
+        CancellationToken cancellationToken)
     {
         var dlqTopicName = _context.GetDlqTopicName();
         var env = Kafka.Context.Infrastructure.Runtime.DlqEnvelopeFactory.From(
@@ -214,12 +220,16 @@ public sealed class DynamicTopicSet
             ex,
             DateTime.UtcNow.ToString("O"));
 
-        return ProduceDlqAsync(dlqTopicName, env, phase);
+        return ProduceDlqAsync(dlqTopicName, env, phase, cancellationToken);
     }
 
-    private async Task ProduceDlqAsync(string dlqTopicName, Kafka.Context.Messaging.DlqEnvelope env, string phase)
+    private async Task ProduceDlqAsync(
+        string dlqTopicName,
+        Kafka.Context.Messaging.DlqEnvelope env,
+        string phase,
+        CancellationToken cancellationToken)
     {
-        await Kafka.Context.Infrastructure.Runtime.DlqProducerService.ProduceAsync(_context.Options, dlqTopicName, env, CancellationToken.None).ConfigureAwait(false);
+        await Kafka.Context.Infrastructure.Runtime.DlqProducerService.ProduceAsync(_context.Options, dlqTopicName, env, cancellationToken).ConfigureAwait(false);
         KafkaContextMetrics.DlqEnqueue("Dynamic", dlqTopicName, phase);
         _context.Logger?.LogInformation(
             "DLQ enqueued to {DlqTopic} phase {Phase}",

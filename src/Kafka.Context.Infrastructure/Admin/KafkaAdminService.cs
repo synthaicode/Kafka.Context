@@ -123,11 +123,13 @@ internal sealed class KafkaAdminService : IDisposable
 
     private Dictionary<string, string> DescribeTopicConfig(string topicName, CancellationToken cancellationToken)
     {
-        _ = cancellationToken;
+        cancellationToken.ThrowIfCancellationRequested();
         var resource = new ConfigResource { Type = ResourceType.Topic, Name = topicName };
         try
         {
-            var results = _adminClient.DescribeConfigsAsync(new[] { resource }).GetAwaiter().GetResult();
+            var task = _adminClient.DescribeConfigsAsync(new[] { resource });
+            task.Wait(cancellationToken);
+            var results = task.Result;
             var first = results.FirstOrDefault();
             if (first is null)
                 return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

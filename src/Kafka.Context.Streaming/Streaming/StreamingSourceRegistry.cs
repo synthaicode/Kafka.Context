@@ -1,12 +1,12 @@
 using Kafka.Context.Streaming;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Kafka.Context.Streaming;
 
 internal sealed class StreamingSourceRegistry : IStreamingSourceRegistry
 {
-    private readonly Dictionary<Type, StreamingSourceConfig> _configs = new();
+    private readonly ConcurrentDictionary<Type, StreamingSourceConfig> _configs = new();
 
     public void AddOrUpdate(Type entityType, StreamingSourceConfig config)
     {

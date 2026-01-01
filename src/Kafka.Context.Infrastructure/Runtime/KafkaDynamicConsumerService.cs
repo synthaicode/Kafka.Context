@@ -58,57 +58,62 @@ internal static class KafkaDynamicConsumerService
 
         await Task.Yield();
 
-        while (!cancellationToken.IsCancellationRequested)
+        try
         {
-            ConsumeResult<byte[], byte[]>? result = null;
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                result = consumer.Consume(cancellationToken);
+                ConsumeResult<byte[], byte[]>? result = null;
+                try
+                {
+                    result = consumer.Consume(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                if (result?.Message?.Value is null)
+                    continue;
+
+                var headers = KafkaConsumerService.ExtractHeaders(result.Message.Headers);
+
+                var timestampUtc = result.Message.Timestamp.Type == TimestampType.NotAvailable
+                    ? string.Empty
+                    : DateTimeOffset.FromUnixTimeMilliseconds(result.Message.Timestamp.UnixTimestampMs).UtcDateTime.ToString("O");
+
+                var meta = new MessageMeta(
+                    result.Topic,
+                    result.Partition.Value,
+                    result.Offset.Value,
+                    timestampUtc);
+
+                object? keyObj;
+                GenericRecord valueObj;
+                try
+                {
+                    keyObj = await DecodeKeyAsync(avro, topic, result.Message.Key).ConfigureAwait(false);
+                    valueObj = await DecodeValueAsync(avro, topic, result.Message.Value).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (onDecodeError is not null)
+                        await onDecodeError(result.Topic, result.Partition.Value, result.Offset.Value, timestampUtc, headers, autoCommit, ex).ConfigureAwait(false);
+
+                    consumer.Commit(result);
+                    continue;
+                }
+
+                if (!autoCommit)
+                    registerCommit(meta, () => consumer.Commit(result));
+
+                await action(keyObj, valueObj, headers, meta).ConfigureAwait(false);
+                logger?.LogDebug("Consumed {Topic} {Partition}:{Offset}", result.Topic, result.Partition.Value, result.Offset.Value);
             }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-
-            if (result?.Message?.Value is null)
-                continue;
-
-            var headers = KafkaConsumerService.ExtractHeaders(result.Message.Headers);
-
-            var timestampUtc = result.Message.Timestamp.Type == TimestampType.NotAvailable
-                ? string.Empty
-                : DateTimeOffset.FromUnixTimeMilliseconds(result.Message.Timestamp.UnixTimestampMs).UtcDateTime.ToString("O");
-
-            var meta = new MessageMeta(
-                result.Topic,
-                result.Partition.Value,
-                result.Offset.Value,
-                timestampUtc);
-
-            object? keyObj;
-            GenericRecord valueObj;
-            try
-            {
-                keyObj = await DecodeKeyAsync(avro, topic, result.Message.Key).ConfigureAwait(false);
-                valueObj = await DecodeValueAsync(avro, topic, result.Message.Value).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (onDecodeError is not null)
-                    await onDecodeError(result.Topic, result.Partition.Value, result.Offset.Value, timestampUtc, headers, autoCommit, ex).ConfigureAwait(false);
-
-                consumer.Commit(result);
-                continue;
-            }
-
-            if (!autoCommit)
-                registerCommit(meta, () => consumer.Commit(result));
-
-            await action(keyObj, valueObj, headers, meta).ConfigureAwait(false);
-            logger?.LogDebug("Consumed {Topic} {Partition}:{Offset}", result.Topic, result.Partition.Value, result.Offset.Value);
         }
-
-        consumer.Close();
+        finally
+        {
+            consumer.Close();
+        }
     }
 
     private static async Task<object?> DecodeKeyAsync(AvroDeserializer<GenericRecord> avro, string topic, byte[]? keyBytes)
@@ -126,7 +131,8 @@ internal static class KafkaDynamicConsumerService
         }
         catch
         {
-            if (TryDecodeWindowedKey(avro, topic, keyBytes, out var windowed))
+            var windowed = await TryDecodeWindowedKeyAsync(avro, topic, keyBytes).ConfigureAwait(false);
+            if (windowed is not null)
                 return windowed;
             throw;
         }
@@ -150,10 +156,11 @@ internal static class KafkaDynamicConsumerService
         return schemaId > 0;
     }
 
-    private static bool TryDecodeWindowedKey(AvroDeserializer<GenericRecord> avro, string topic, byte[] bytes, out WindowedKey windowedKey)
+    private static async Task<WindowedKey?> TryDecodeWindowedKeyAsync(
+        AvroDeserializer<GenericRecord> avro,
+        string topic,
+        byte[] bytes)
     {
-        windowedKey = null!;
-
         var ctx = new SerializationContext(MessageComponentType.Key, topic);
 
         foreach (var suffixLen in new[] { 12, 16, 8 })
@@ -167,7 +174,7 @@ internal static class KafkaDynamicConsumerService
 
             try
             {
-                var record = avro.DeserializeAsync(trimmed, isNull: false, ctx).GetAwaiter().GetResult();
+                var record = await avro.DeserializeAsync(trimmed, isNull: false, ctx).ConfigureAwait(false);
                 var suffix = bytes.AsSpan(bytes.Length - suffixLen, suffixLen);
 
                 long start;
@@ -198,14 +205,13 @@ internal static class KafkaDynamicConsumerService
                         break;
                 }
 
-                windowedKey = new WindowedKey(record, start, end, seq);
-                return true;
+                return new WindowedKey(record, start, end, seq);
             }
             catch
             {
             }
         }
 
-        return false;
+        return null;
     }
 }

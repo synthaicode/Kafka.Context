@@ -1,6 +1,7 @@
 using Kafka.Context.Messaging;
 using Kafka.Context.Diagnostics;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace Kafka.Context;
 
@@ -8,7 +9,7 @@ public sealed class EventSet<T>
 {
     private readonly KafkaContext _context;
     private ErrorHandlingPolicy _policy = new();
-    private readonly Dictionary<MessageMeta, Action> _manualCommit = new();
+    private readonly ConcurrentDictionary<MessageMeta, Action> _manualCommit = new();
 
     public EventSet(KafkaContext context)
     {
@@ -91,7 +92,7 @@ public sealed class EventSet<T>
                     meta.TimestampUtc);
 
                 KafkaContextMetrics.Consumed(typeof(T).Name, GetTopicName(), autoCommit: true);
-                await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit: true, action).ConfigureAwait(false);
+                await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit: true, action, cancellationToken).ConfigureAwait(false);
             },
             autoCommit: true,
             registerCommit: (_, _) => { },
@@ -128,11 +129,11 @@ public sealed class EventSet<T>
                 KafkaContextMetrics.Consumed(typeof(T).Name, GetTopicName(), autoCommit);
                 try
                 {
-                    await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit, (e) => action(e, headers, meta)).ConfigureAwait(false);
+                    await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit, (e) => action(e, headers, meta), CancellationToken.None).ConfigureAwait(false);
                  }
                  finally
                  {
-                    if (!autoCommit && _manualCommit.Remove(meta))
+                    if (!autoCommit && _manualCommit.TryRemove(meta, out _))
                     {
                         _context.Logger?.LogWarning(
                             "Manual commit was not called for {EntityType} on {Topic} offset {Offset}",
@@ -168,11 +169,11 @@ public sealed class EventSet<T>
                 KafkaContextMetrics.Consumed(typeof(T).Name, GetTopicName(), autoCommit);
                 try
                 {
-                    await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit, (e) => action(e, headers, meta)).ConfigureAwait(false);
+                    await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit, (e) => action(e, headers, meta), cancellationToken).ConfigureAwait(false);
                  }
                  finally
                  {
-                    if (!autoCommit && _manualCommit.Remove(meta))
+                    if (!autoCommit && _manualCommit.TryRemove(meta, out _))
                     {
                         _context.Logger?.LogWarning(
                             "Manual commit was not called for {EntityType} on {Topic} offset {Offset}",
@@ -205,7 +206,7 @@ public sealed class EventSet<T>
                     meta.TimestampUtc);
 
                 KafkaContextMetrics.Consumed(typeof(T).Name, GetTopicName(), autoCommit: true);
-                await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit: true, (e) => action(e, headers, meta)).ConfigureAwait(false);
+                await ExecuteWithPolicyAsync(entity, headers, meta, autoCommit: true, (e) => action(e, headers, meta), cts.Token).ConfigureAwait(false);
             },
             autoCommit: true,
             registerCommit: (_, _) => { },
@@ -217,10 +218,9 @@ public sealed class EventSet<T>
     {
         if (meta is null) throw new ArgumentNullException(nameof(meta));
 
-        if (_manualCommit.TryGetValue(meta, out var commit))
+        if (_manualCommit.TryRemove(meta, out var commit))
         {
             commit();
-            _manualCommit.Remove(meta);
             KafkaContextMetrics.ManualCommit(typeof(T).Name, GetTopicName());
             return;
         }
@@ -237,7 +237,13 @@ public sealed class EventSet<T>
         _manualCommit[meta] = commit;
     }
 
-    private async Task ExecuteWithPolicyAsync(T entity, Dictionary<string, string> headers, MessageMeta meta, bool autoCommit, Func<T, Task> action)
+    private async Task ExecuteWithPolicyAsync(
+        T entity,
+        Dictionary<string, string> headers,
+        MessageMeta meta,
+        bool autoCommit,
+        Func<T, Task> action,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -286,7 +292,7 @@ public sealed class EventSet<T>
 
             if (_policy.ErrorAction == ErrorAction.DLQ)
             {
-                await SendToDlqAsync(meta, headers, ex, phase: "handler_error").ConfigureAwait(false);
+                await SendToDlqAsync(meta, headers, ex, phase: "handler_error", cancellationToken).ConfigureAwait(false);
             }
 
             if (!autoCommit)
@@ -312,10 +318,15 @@ public sealed class EventSet<T>
             return Task.CompletedTask;
 
         var meta = new MessageMeta(topic, partition, offset, timestampUtc);
-        return SendToDlqAsync(meta, headers, ex, phase: "mapping_error");
+        return SendToDlqAsync(meta, headers, ex, phase: "mapping_error", CancellationToken.None);
     }
 
-    private Task SendToDlqAsync(MessageMeta meta, Dictionary<string, string> headers, Exception ex, string phase)
+    private Task SendToDlqAsync(
+        MessageMeta meta,
+        Dictionary<string, string> headers,
+        Exception ex,
+        string phase,
+        CancellationToken cancellationToken)
     {
         var dlqTopicName = _context.GetDlqTopicName();
         var env = Kafka.Context.Infrastructure.Runtime.DlqEnvelopeFactory.From(
@@ -327,12 +338,16 @@ public sealed class EventSet<T>
             ex,
             DateTime.UtcNow.ToString("O"));
 
-        return ProduceDlqAsync(dlqTopicName, env, phase);
+        return ProduceDlqAsync(dlqTopicName, env, phase, cancellationToken);
     }
 
-    private async Task ProduceDlqAsync(string dlqTopicName, Kafka.Context.Messaging.DlqEnvelope env, string phase)
+    private async Task ProduceDlqAsync(
+        string dlqTopicName,
+        Kafka.Context.Messaging.DlqEnvelope env,
+        string phase,
+        CancellationToken cancellationToken)
     {
-        await Kafka.Context.Infrastructure.Runtime.DlqProducerService.ProduceAsync(_context.Options, dlqTopicName, env, CancellationToken.None).ConfigureAwait(false);
+        await Kafka.Context.Infrastructure.Runtime.DlqProducerService.ProduceAsync(_context.Options, dlqTopicName, env, cancellationToken).ConfigureAwait(false);
         KafkaContextMetrics.DlqEnqueue(typeof(T).Name, dlqTopicName, phase);
         _context.Logger?.LogInformation(
             "DLQ enqueued {EntityType} to {DlqTopic} phase {Phase}",

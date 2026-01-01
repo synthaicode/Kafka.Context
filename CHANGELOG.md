@@ -6,6 +6,12 @@ This project follows Semantic Versioning (SemVer).
 
 ## Unreleased
 
+## 1.2.1 - 2026-01-01
+
+- Make manual commit tracking thread-safe and propagate cancellation to DLQ production.
+- Ensure Kafka consumers close on exceptions and remove sync-over-async from dynamic windowed key decoding.
+- Add concurrency safety for streaming registries and honor cancellation in topic config reads.
+
 ## 1.2.0 - 2025-12-22
 
 - [BREAKING] Remove entity access modes (readOnly/writeOnly): `IModelBuilder.Entity<T>` no longer accepts flags and `EventSet<T>` no longer enforces read/write constraints.
