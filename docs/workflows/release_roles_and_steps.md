@@ -55,6 +55,18 @@ NuGet のバージョンは以下のいずれかで一元管理する:
 
 ## 3) リリース前チェック（Local prep）
 
+### 3.0 Code review（必須）
+タイミング:
+- `release/<version>` 作成直後（Local prep 開始時）
+- RC publish 前（タグ作成前）
+
+観点（最小）:
+- 例外経路でのリソース解放（Dispose/Close/Commit）
+- キャンセル伝播（CancellationToken の尊重）
+- 並行実行の安全性（スレッドセーフ / 競合）
+- 破壊的変更の有無（API / 挙動 / 設定）
+- テスト影響範囲（unit / physical / golden の必要性）
+
 ### 3.1 変更点の記録（必須）
 - API/挙動/設定の変更がある場合は `docs/diff_log/diff_<topic>_<YYYYMMDD>.md` を追加する。
 
